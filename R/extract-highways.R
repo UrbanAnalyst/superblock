@@ -138,9 +138,6 @@ dl_hw_data <- function (highway_names, hw_abbrvs, bbox) {
 #' @noRd
 extract_highway <- function (name = "", bbox) {
 
-    check_arg (name, "name", "character")
-    bbox <- check_bbox_arg (bbox)
-
     qry <- osmdata::opq (bbox = bbox)
     qry <- osmdata::add_osm_feature (qry, key = "highway")
     qry <- osmdata::add_osm_feature (qry,
