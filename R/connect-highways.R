@@ -429,20 +429,41 @@ sps_through_cycle <- function (ways, cyc, outer = TRUE) {
         ways [[c0]] <- unname (lapply (paths [index], function (p) {
             w0_flat [match (p, rownames (w0_flat)), ]
         }))
-        # Then remove strict sub-sets:
-        combs <- utils::combn (length (ways [[c0]]), m = 2L)
-        # combs <- cbind (combs, combs [2:1, ])
-        subsets <- apply (combs, 2, function (m) {
-            n1 <- rownames (ways [[c0]] [[m [1]]])
-            n2 <- rownames (ways [[c0]] [[m [2]]])
-            all (n2 %in% n1)
-        }, simplify = TRUE)
-        if (any (subsets)) {
-            subsets <- sort (unique (combs [2, which (subsets)]))
-            ways [[c0]] <- ways [[c0]] [-subsets]
+        # Rm any duplicated ways:
+        nodes <- lapply (ways [[c0]], function (w) sort (rownames (w)))
+        index <- which (duplicated (nodes))
+        if (length (index) > 0L) {
+            ways [[c0]] <- ways [[c0]] [-index]
         }
+        if (length (ways [[c0]]) > 1L) {
+            # Then remove strict sub-sets:
+            combs <- utils::combn (length (ways [[c0]]), m = 2L)
+            combs <- cbind (combs, combs [2:1, ])
+            subsets <- apply (combs, 2, function (m) {
+                n1 <- rownames (ways [[c0]] [[m [1]]])
+                n2 <- rownames (ways [[c0]] [[m [2]]])
+                all (n2 %in% n1)
+            }, simplify = TRUE)
+            if (any (subsets)) {
+                subsets <- sort (unique (combs [2, which (subsets)]))
+                ways [[c0]] <- ways [[c0]] [-subsets]
+            }
+        }
+
+        dmax <- lapply (
+            ways [[c0]],
+            function (w) max (geodist::geodist (xy0, w))
+        )
+        index <- ifelse (outer, which.max (dmax),  which.min (dmax))
+        ways [[c0]] <- ways [[c0]] [index]
     }
 
-    thepath <- NULL
+    ways <- do.call (c, ways)
+    ways <- ways [rev (seq_along (ways))]
+
+    thepath <- do.call (rbind, ways)
+    thepath <- unique (thepath)
+    thepath <- rbind (thepath, head (thepath, 1L))
+
     return (thepath)
 }
