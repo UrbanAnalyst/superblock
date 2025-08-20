@@ -39,7 +39,7 @@
 #' }
 #'
 #' @export
-connect_highways <- function (highways, bbox) {
+connect_highways <- function (highways, bbox, outer = TRUE) {
 
     if (missing (highways)) {
         stop ("A vector of highway names must be given")
@@ -47,6 +47,10 @@ connect_highways <- function (highways, bbox) {
     if (missing (bbox)) {
         stop ("A bounding box must be given")
     }
+    if (length (outer) == 1L) {
+        outer <- rep (outer, length (ways))
+    }
+    stopifnot (length (outer) == length (highways))
 
     # Uses extract_highways to generate a list of highways, each component of
     # which is a spatially ordered list of distinct segments. Then uses
@@ -89,7 +93,7 @@ connect_highways <- function (highways, bbox) {
         }
 
         # shortest path through the entire cycle:
-        path <- sps_through_cycle (ways, cyc)
+        path <- sps_through_cycle (ways, cyc, outer = outer)
     }
 
     return (path)
@@ -150,11 +154,6 @@ get_conmat <- function (ways) {
 #'
 #' @noRd
 sps_through_cycle <- function (ways, cyc, outer = TRUE) {
-
-    if (length (outer) == 1L) {
-        outer <- rep (outer, length (ways))
-    }
-    stopifnot (length (outer) == length (ways))
 
     cyc <- rbind (cyc, cyc [1, ])
     xy0 <- apply (do.call (rbind, do.call (c, ways)), 2, mean)
