@@ -1,0 +1,85 @@
+{
+  "@context": "https://doi.org/10.5063/schema/codemeta-2.0",
+  "@type": "SoftwareSourceCode",
+  "identifier": "superblock",
+  "description": "Analyses of potential superblocks.",
+  "name": "superblock: Analyses of potential superblock",
+  "codeRepository": "https://github.com/UrbanAnalyst/superblock-ms",
+  "issueTracker": "https://github.com/UrbanAnalyst/superblock-ms/issues",
+  "license": "https://spdx.org/licenses/GPL-3.0",
+  "version": "0.0.1.1",
+  "programmingLanguage": {
+    "@type": "ComputerLanguage",
+    "name": "R",
+    "url": "https://r-project.org"
+  },
+  "runtimePlatform": "R version 4.5.1 (2025-06-13)",
+  "author": [
+    {
+      "@type": "Person",
+      "givenName": "Mark",
+      "familyName": "Padgham",
+      "email": "mark.padgham@email.com"
+    }
+  ],
+  "maintainer": [
+    {
+      "@type": "Person",
+      "givenName": "Mark",
+      "familyName": "Padgham",
+      "email": "mark.padgham@email.com"
+    }
+  ],
+  "softwareRequirements": {
+    "1": {
+      "@type": "SoftwareApplication",
+      "identifier": "dodgr",
+      "name": "dodgr",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=dodgr"
+    },
+    "2": {
+      "@type": "SoftwareApplication",
+      "identifier": "geodist",
+      "name": "geodist",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=geodist"
+    },
+    "3": {
+      "@type": "SoftwareApplication",
+      "identifier": "ggm",
+      "name": "ggm",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=ggm"
+    },
+    "4": {
+      "@type": "SoftwareApplication",
+      "identifier": "osmdata",
+      "name": "osmdata",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=osmdata"
+    },
+    "SystemRequirements": null
+  },
+  "fileSize": "8084.085KB"
+}
