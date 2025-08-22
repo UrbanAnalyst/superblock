@@ -80,7 +80,7 @@ dl_hw_data <- function (highway_names, hw_abbrvs, bbox) {
     while (lens != lens_old) {
 
         indx <- NULL
-        pb <- txtProgressBar (max = 1, style = 3)
+        pb <- utils::txtProgressBar (max = 1, style = 3)
         # style = 3 shows start and end positions
         for (i in seq (highway_names)) {
 
@@ -92,7 +92,7 @@ dl_hw_data <- function (highway_names, hw_abbrvs, bbox) {
                     indx <- c (indx, i)
                 }
             }
-            setTxtProgressBar (pb, i / length (highway_names))
+            utils::setTxtProgressBar (pb, i / length (highway_names))
         }
         lens <- rep (0, length (indx))
         for (i in seq (indx)) {

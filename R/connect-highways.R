@@ -241,7 +241,7 @@ sps_through_cycle <- function (ways, cyc, outer = TRUE) {
 
     thepath <- do.call (rbind, ways)
     thepath <- unique (thepath)
-    thepath <- rbind (thepath, head (thepath, 1L))
+    thepath <- rbind (thepath, utils::head (thepath, 1L))
 
     return (thepath)
 }

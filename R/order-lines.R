@@ -89,10 +89,10 @@ which_xy <- function (xy, xy_ordi, fn = "head") {
 #' @noRd
 rbind_xy <- function (xy, xy_ord) {
 
-    if (head (rownames (xy_ord), 1) %in% rownames (xy)) {
+    if (utils::head (rownames (xy_ord), 1) %in% rownames (xy)) {
         xy_ord <- apply (xy_ord, 2, rev)
     } # flip to rbind at bottom
-    if (tail (rownames (xy), 1) %in% rownames (xy_ord)) {
+    if (utils::tail (rownames (xy), 1) %in% rownames (xy_ord)) {
         xy <- apply (xy, 2, rev)
     } # flip to rbind at top
 
