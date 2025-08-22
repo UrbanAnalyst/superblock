@@ -37,9 +37,6 @@ relationships between named highways.
 }
 \examples{
 bbox <- get_bbox (c (-0.13, 51.5, -0.11, 51.52))
-bbox <- array (bbox, dim = c (2, 2))
-dimnames (bbox) <- list (c ("x", "y"), c ("min", "max"))
-
 highways <- c (
     "Monmouth.St", "Short.?s.Gardens", "Endell.St", "Long.Acre",
     "Upper.Saint.Martin"

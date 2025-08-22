@@ -6,7 +6,7 @@
 \alias{superblock-package}
 \title{superblock: Analyses of potential superblock}
 \description{
-Analyses of potential superblock
+Analyses of potential superblocks.
 }
 \seealso{
 Useful links:
