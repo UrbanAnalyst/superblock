@@ -4,7 +4,7 @@
 \alias{connect_highways}
 \title{connect_highways}
 \usage{
-connect_highways(highways, bbox, plot = FALSE)
+connect_highways(highways, bbox, outer = TRUE)
 }
 \arguments{
 \item{highways}{A vector of highway names passed directly to the Overpass
@@ -14,37 +14,32 @@ the overpass API.}
 \item{bbox}{the bounding box for the map.  A 2-by-2 matrix of 4 elements with
 columns of min and max values, and rows of x and y values.}
 
-\item{plot}{If \code{TRUE}, then all OSM data for each highway is plotted and
-the final cycle overlaid.}
+\item{outer}{Either a single logical parameter, or a logical vector of the
+same length as \code{hightways}. For cases where multiple paths are possible, the
+default \code{outer = TRUE} will select the path lying farthest to the outside of
+the resultant polygon, while \code{outer = FALSE} will select the path
+lying closest to the inside.}
 }
 \value{
 A single set of \code{SpatialPoints} containing the lat-lon
 coordinates of the cyclic line connecting all given streets.
 }
 \description{
-Adapted from 'osmplotr', but uses dodgr here for better results.
-}
-\details{
 Takes a list of highways names which must enclose an internal area, and
 returns a \code{SpatialLines} object containing a sequence of OSM nodes which
 cyclically connect all highways. Will fail if the streets do not form a
 cycle.
 }
 \note{
-\enumerate{
-\item \code{connect_highways} is primarily intended to provide a means to
-define boundaries of groups which can then be highlighted using
-\code{\link{add_osm_groups}}.
-\item This function can not be guaranteed failsafe owing both to the
+This function can not be guaranteed failsafe owing both to the
 inherently unpredictable nature of OpenStreetMap, as well as to the unknown
-relationships between named highways. The \code{plot} option enables
-problematic cases to be examined and hopefully resolved.  The function is
-still experimental, so please help further improvements by reporting any
-problems!
-}
+relationships between named highways.
 }
 \examples{
 bbox <- get_bbox (c (-0.13, 51.5, -0.11, 51.52))
+bbox <- array (bbox, dim = c (2, 2))
+dimnames (bbox) <- list (c ("x", "y"), c ("min", "max"))
+
 highways <- c (
     "Monmouth.St", "Short.?s.Gardens", "Endell.St", "Long.Acre",
     "Upper.Saint.Martin"
@@ -53,9 +48,9 @@ highways <- c (
 # and that '?' denotes optional previous character and so here matches
 # both "Shorts Gardens" and "Short's Gardens"
 \dontrun{
-highways1 <- connect_highways (highways = highways, bbox = bbox, plot = TRUE)
+highways1 <- connect_highways (highways = highways, bbox = bbox)
 highways <- c ("Endell.St", "High.Holborn", "Drury.Lane", "Long.Acre")
-highways2 <- connect_highways (highways = highways, bbox = bbox, plot = TRUE)
+highways2 <- connect_highways (highways = highways, bbox = bbox)
 }
 
 }

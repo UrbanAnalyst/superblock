@@ -12,19 +12,21 @@
 #' columns of min and max values, and rows of x and y values.
 #' @return A single set of \code{SpatialPoints} containing the lat-lon
 #' coordinates of the cyclic line connecting all given streets.
+#' @param outer Either a single logical parameter, or a logical vector of the
+#' same length as `hightways`. For cases where multiple paths are possible, the
+#' default `outer = TRUE` will select the path lying farthest to the outside of
+#' the resultant polygon, while `outer = FALSE` will select the path
+#' lying closest to the inside.
 #'
-#' @note \enumerate{
-#' \item \code{connect_highways} is primarily intended to provide a means to
-#' define boundaries of groups which can then be highlighted using
-#' \code{\link{add_osm_groups}}.
-#' \item This function can not be guaranteed failsafe owing both to the
+#' @note This function can not be guaranteed failsafe owing both to the
 #' inherently unpredictable nature of OpenStreetMap, as well as to the unknown
-#' relationships between named highways.#' }
-#'
-#' @seealso \code{\link{add_osm_groups}}.
+#' relationships between named highways.
 #'
 #' @examples
 #' bbox <- get_bbox (c (-0.13, 51.5, -0.11, 51.52))
+#' bbox <- array (bbox, dim = c (2, 2))
+#' dimnames (bbox) <- list (c ("x", "y"), c ("min", "max"))
+#'
 #' highways <- c (
 #'     "Monmouth.St", "Short.?s.Gardens", "Endell.St", "Long.Acre",
 #'     "Upper.Saint.Martin"
@@ -81,7 +83,7 @@ connect_highways <- function (highways, bbox, outer = TRUE) {
     cycles <- try (ggm::fundCycles (conmat), TRUE)
 
     path <- NULL
-    if (is.null (cycles) || is (attr (cycles, "condition"), "simpleError")) {
+    if (is.null (cycles) || inherits (attr (cycles, "condition"), "simpleError")) {
         warning ("There are no cycles in the listed highways")
     } else {
 
