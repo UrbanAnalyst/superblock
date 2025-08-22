@@ -24,9 +24,6 @@
 #'
 #' @examples
 #' bbox <- get_bbox (c (-0.13, 51.5, -0.11, 51.52))
-#' bbox <- array (bbox, dim = c (2, 2))
-#' dimnames (bbox) <- list (c ("x", "y"), c ("min", "max"))
-#'
 #' highways <- c (
 #'     "Monmouth.St", "Short.?s.Gardens", "Endell.St", "Long.Acre",
 #'     "Upper.Saint.Martin"
@@ -53,6 +50,10 @@ connect_highways <- function (highways, bbox, outer = TRUE) {
         outer <- rep (outer, length (ways))
     }
     stopifnot (length (outer) == length (highways))
+
+    if (!inherits (bbox, "matrix")) {
+        bbox <- get_bbox (bbox)
+    }
 
     # Uses extract_highways to generate a list of highways, each component of
     # which is a spatially ordered list of distinct segments. Then uses
