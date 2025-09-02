@@ -18,6 +18,8 @@ sb_osmdata_extract <- function (bbox, hw_names, outer = TRUE) {
     open_spaces <- extract_osm_open_spaces (bbox, bounding_poly)
 
     list (
+        bbox = bbox,
+        hw_names = hw_names,
         bounding_poly = bounding_poly,
         highways = highways,
         buildings = buildings,

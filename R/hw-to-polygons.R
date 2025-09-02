@@ -1,3 +1,41 @@
+#' Convert all highway lines into polygons bounded by the surrounding polygon
+#' geometry of buildings and open spaces.
+#'
+#' @param osmdat Object returned from \link{sb_osmdata_extract}.
+#' @return An \pkg{sf} `data.frame` of polygons tracing polygons around all
+#' interior streets until the edges of surrounding polygons.
+#' @export
+hws_to_polygons <- function (osmdat) {
+
+    hws_internal <- reduce_osm_highways (osmdat$highways, osmdat$hw_names)
+    all_polys <- dplyr::bind_rows (osmdat$buildings, osmdat$open_spaces)
+
+    index <- seq_len (nrow (hws_internal))
+    hw_polys <- lapply (index, function (i) {
+        xy_i <- as.matrix (hws_internal$geometry [[i]])
+
+        ret <- hw_to_polygon (xy_i, all_polys) |>
+            sfheaders::sf_polygon () |>
+            sf::st_make_valid ()
+        if (nrow (sf::st_coordinates (ret)) < 4) {
+            # polygons require at least 4 points
+            return (NULL)
+        }
+
+        if (sf::st_geometry_type (ret) == "MULTIPOLYGON") {
+            ret <- sf::st_cast (ret, "POLYGON")
+        }
+
+        return (ret)
+    })
+
+    g <- do.call (rbind, hw_polys) |>
+        sf::st_sf (crs = 4326) |>
+        sf::st_union () |>
+        sf::st_cast ("POLYGON")
+    sf::st_sf (geometry = g)
+}
+
 #' Convert one highway as an \pkg{sf} "linestring" object into a polygon
 #' defined by nearest points in "polygons".
 #'
@@ -13,9 +51,9 @@ hw_to_polygon <- function (xy, polygons) {
     xy <- extend_xy_to_bb (xy, bb)
 
     xy_sf_p <- sfheaders::sf_polygon (xy) |> sf::st_sf (crs = 4326)
-    index <- sf::st_within (all_polys, xy_sf_p, sparse = FALSE) [, 1]
-    these_polys <- all_polys [which (index), ]
-    those_polys <- all_polys [which (!index), ]
+    index <- sf::st_within (polygons, xy_sf_p, sparse = FALSE) [, 1]
+    these_polys <- polygons [which (index), ]
+    those_polys <- polygons [which (!index), ]
 
     get_nearest_poly_points <- function (xy, polys) {
         g_pts <- sf::st_coordinates (polys) [, 1:2]
