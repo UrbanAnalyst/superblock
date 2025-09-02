@@ -64,18 +64,38 @@ extend_xy_to_bb <- function (xy, bb) {
     xrange <- range (xy [, 1])
     yrange <- range (xy [, 2])
 
-    if (xy [1, 1] == xrange [1] && xy [1, 2] == yrange [1]) {
-        # bottom left -> bottom right
-        xynew <- c (xrange [2], yrange [1])
-    } else if (xy [1, 1] == xrange [1] && xy [1, 2] == yrange [2]) {
-        # top left -> top right
-        xynew <- c (xrange [2], yrange [2])
-    } else if (xy [1, 1] == xrange [2] && xy [1, 2] == yrange [1]) {
-        # bottom right -> bottom left
-        xynew <- c (xrange [1], yrange [1])
-    } else if (xy [1, 1] == xrange [2] && xy [1, 2] == yrange [2]) {
-        # bottom right -> bottom left
-        xynew <- c (xrange [2], yrange [1])
+    index_x <- match (xrange, xy [, 1])
+    move_x <- all (index_x %in% c (1, nrow (xy)))
+    if (move_x) {
+        # Extreme x values are 1st and last points
+        if (xy [1, 1] == xrange [1] && xy [1, 2] == yrange [1]) {
+            # bottom left -> bottom right
+            xynew <- c (xrange [2], yrange [1])
+        } else if (xy [1, 1] == xrange [1] && xy [1, 2] == yrange [2]) {
+            # top left -> top right
+            xynew <- c (xrange [2], yrange [2])
+        } else if (xy [1, 1] == xrange [2] && xy [1, 2] == yrange [1]) {
+            # bottom right -> bottom left
+            xynew <- c (xrange [1], yrange [1])
+        } else if (xy [1, 1] == xrange [2] && xy [1, 2] == yrange [2]) {
+            # bottom right -> bottom left
+            xynew <- c (xrange [2], yrange [1])
+        }
+    } else {
+        # Extreme x values are somewhere inbetween, so connect to y-points
+        if (xy [1, 1] == xrange [1] && xy [1, 2] == yrange [2]) {
+            # top left -> bottom left
+            xynew <- c (xrange [1], yrange [1])
+        } else if (xy [1, 1] == xrange [1] && xy [1, 2] == yrange [1]) {
+            # bottom left -> top left
+            xynew <- c (xrange [2], yrange [2])
+        } else if (xy [1, 1] == xrange [2] && xy [1, 2] == yrange [2]) {
+            # top right -> bottom right
+            xynew <- c (xrange [2], yrange [1])
+        } else if (xy [1, 1] == xrange [2] && xy [1, 2] == yrange [1]) {
+            # bottom right -> top right
+            xynew <- c (xrange [2], yrange [2])
+        }
     }
     xy <- rbind (xy, xynew, xy [1, ])
 
