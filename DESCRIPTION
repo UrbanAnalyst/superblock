@@ -1,6 +1,6 @@
 Package: superblock
 Title: Analyses of potential superblock
-Version: 0.0.1.005
+Version: 0.0.1.006
 Authors@R: 
     person(given = "Mark",
            family = "Padgham",
@@ -14,7 +14,9 @@ Imports:
     dodgr,
     geodist,
     ggm,
-    osmdata
+    osmdata,
+    sf,
+    sfheaders
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
