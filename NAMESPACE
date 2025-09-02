@@ -2,3 +2,4 @@
 
 export(connect_highways)
 export(get_bbox)
+export(sb_osmdata_extract)
