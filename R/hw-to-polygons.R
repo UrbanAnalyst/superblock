@@ -77,7 +77,7 @@ extend_xy_to_bb <- function (xy, bb) {
         } else if (xy [1, 1] == xrange [2] && xy [1, 2] == yrange [1]) {
             # bottom right -> bottom left
             xynew <- c (xrange [1], yrange [1])
-        } else if (xy [1, 1] == xrange [2] && xy [1, 2] == yrange [2]) {
+        } else {
             # bottom right -> bottom left
             xynew <- c (xrange [2], yrange [1])
         }
@@ -92,12 +92,12 @@ extend_xy_to_bb <- function (xy, bb) {
         } else if (xy [1, 1] == xrange [2] && xy [1, 2] == yrange [2]) {
             # top right -> bottom right
             xynew <- c (xrange [2], yrange [1])
-        } else if (xy [1, 1] == xrange [2] && xy [1, 2] == yrange [1]) {
+        } else {
             # bottom right -> top right
             xynew <- c (xrange [2], yrange [2])
         }
     }
-    xy <- rbind (xy, xynew, xy [1, ])
+    xy <- rbind (unique (rbind (xy, xynew)), xy [1, ])
 
     return (xy)
 }
