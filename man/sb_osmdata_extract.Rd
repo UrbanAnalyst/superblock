@@ -11,7 +11,7 @@ sb_osmdata_extract(bbox, hw_names, outer = TRUE)
 \item{bbox}{Bounding box as vector of (xmin, ymin, xmax, ymax).A}
 
 \item{hw_names}{Character vector naming highways which entirely surround
-desired area. Highway names can be entrered in any order.}
+desired area. Highway names can be entered in any order.}
 
 \item{outer}{Single value or logical vector of same length as \code{hw_names},
 specifying whether perimeter of desired area should be traced along outer

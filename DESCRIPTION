@@ -1,6 +1,6 @@
 Package: superblock
 Title: Analyses of potential superblock
-Version: 0.0.1.008
+Version: 0.0.1.009
 Authors@R: 
     person(given = "Mark",
            family = "Padgham",
@@ -11,6 +11,7 @@ License: GPL-3
 URL: https://github.com/UrbanAnalyst/superblock-ms
 BugReports: https://github.com/UrbanAnalyst/superblock-ms/issues
 Imports:
+    dplyr,
     dodgr,
     geodist,
     ggm,

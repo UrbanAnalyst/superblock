@@ -3,7 +3,7 @@
 #'
 #' @param bbox Bounding box as vector of (xmin, ymin, xmax, ymax).A
 #' @param hw_names Character vector naming highways which entirely surround
-#' desired area. Highway names can be entrered in any order.
+#' desired area. Highway names can be entered in any order.
 #' @param outer Single value or logical vector of same length as `hw_names`,
 #' specifying whether perimeter of desired area should be traced along outer
 #' (TRUE) or inner (FALSE) ways.
@@ -14,9 +14,10 @@ sb_osmdata_extract <- function (bbox, hw_names, outer = TRUE) {
 
     bounding_poly <- extract_bounding_polygon (bbox, hw_names, outer)
     hws <- extract_osm_highways (bbox, bounding_poly)
+    hws_internal <- reduce_osm_highways (hws, hw_names)
     buildings <- extract_osm_buildings (bbox, bounding_poly)
     open_spaces <- extract_osm_open_spaces (bbox, bounding_poly)
-
+    all_polys <- dplyr::bind_rows (buildings, open_spaces)
 }
 
 extract_bounding_polygon <- function (bbox, hw_names, outer = TRUE) {
@@ -40,6 +41,22 @@ extract_osm_highways <- function (bbox, bounding_poly) {
     has_data <- vapply (nms, function (n) any (!is.na (hws [[n]])), logical (1L))
     has_data <- c (which (has_data), which (nms == "geometry"))
     hws [, has_data]
+}
+
+#' Reduce ways down to main roads only within the bounding polygon, but
+#' excluding the boundary ways themselves. Also remove all block-internal and
+#' private ways.
+#' @noRd
+reduce_osm_highways <- function (hws, hw_names) {
+
+    hws_internal <- hws [which (!hws$name %in% hw_names), ]
+    index <- which (
+        hws$highway %in% c ("residential", "secondary", "service", "tertiary") &
+            !hws$service %in% c ("driveway", "parking_aisle")
+    )
+    index <- which (hws$highway %in% c ("residential", "secondary", "tertiary"))
+    hws_internal <- hws [index, ]
+    hws_internal [which (!hws_internal$name %in% hw_names), ]
 }
 
 extract_osm_buildings <- function (bbox, bounding_poly) {
