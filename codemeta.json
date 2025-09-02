@@ -7,7 +7,7 @@
   "codeRepository": "https://github.com/UrbanAnalyst/superblock-ms",
   "issueTracker": "https://github.com/UrbanAnalyst/superblock-ms/issues",
   "license": "https://spdx.org/licenses/GPL-3.0",
-  "version": "0.0.1.9",
+  "version": "0.0.1.010",
   "programmingLanguage": {
     "@type": "ComputerLanguage",
     "name": "R",
@@ -115,7 +115,7 @@
       },
       "sameAs": "https://CRAN.R-project.org/package=sfheaders"
     },
-    "SystemRequirements": null
+    "SystemRequirements": {}
   },
   "fileSize": "138.917KB"
 }

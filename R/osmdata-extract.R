@@ -14,10 +14,15 @@ sb_osmdata_extract <- function (bbox, hw_names, outer = TRUE) {
 
     bounding_poly <- extract_bounding_polygon (bbox, hw_names, outer)
     hws <- extract_osm_highways (bbox, bounding_poly)
-    hws_internal <- reduce_osm_highways (hws, hw_names)
     buildings <- extract_osm_buildings (bbox, bounding_poly)
     open_spaces <- extract_osm_open_spaces (bbox, bounding_poly)
-    all_polys <- dplyr::bind_rows (buildings, open_spaces)
+
+    list (
+        bounding_poly = bounding_poly,
+        highways = highways,
+        buildings = buildings,
+        open_spaces = open_spaces
+    )
 }
 
 extract_bounding_polygon <- function (bbox, hw_names, outer = TRUE) {
