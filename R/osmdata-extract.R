@@ -93,7 +93,7 @@ extract_osm_buildings <- function (bbox, bounding_poly) {
 
     is_test_env <- identical (Sys.getenv ("SUPERBLOCK_TESTS", "nope"), "true")
     if (is_test_env) {
-        q <- osmdata::add_osm_feature (q, key = "addr:housenumber", value = 2)
+        q <- osmdata::add_osm_feature (q, key = "addr:housenumber", value = 2:6)
     }
 
     dat <- m_osmdata_sf (q)

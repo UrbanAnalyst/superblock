@@ -19,9 +19,12 @@ test_that ("osm extraction", {
             extract_osm_highways (bbox, bounding_poly)
         })
     )
-    # buildings <- httptest2::with_mock_dir ("osm-bldg", {
-    #     extract_osm_buildings (bbox, bounding_poly)
-    # })
+    withr::with_envvar (
+        list ("SUPERBLOCK_TESTS" = "true"),
+        buildings <- httptest2::with_mock_dir ("osm-bldg", {
+            extract_osm_buildings (bbox, bounding_poly)
+        })
+    )
     # open_spaces <- httptest2::with_mock_dir ("osm-open", {
     #     extract_osm_open_spaces (bbox, bounding_poly)
     # })
