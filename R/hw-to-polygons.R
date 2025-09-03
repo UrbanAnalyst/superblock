@@ -2,20 +2,52 @@
 #' geometry of buildings and open spaces.
 #'
 #' @param osmdat Object returned from \link{sb_osmdata_extract}.
+#' @param interval in metres to interpolate highways and project onto nearby
+#' polygons. Values of 0 or less will not interpolate, and polygons will only
+#' be defined by using points at which lines are defined within Open Street
+#' Map. This may recuce the accuracy of resultant polygons.
 #' @return An \pkg{sf} `data.frame` of polygons tracing polygons around all
 #' interior streets until the edges of surrounding polygons.
 #' @export
-hws_to_polygons <- function (osmdat) {
+hws_to_polygons <- function (osmdat, interval = 10) {
 
     hws_internal <- reduce_osm_highways (osmdat$highways, osmdat$hw_names)
+    if (interval > 0) {
+        hws_internal <- sf::st_transform (
+            hws_internal,
+            "+proj=merc +a=6378137 +b=6378137"
+        )
+    }
     all_polys <- dplyr::bind_rows (osmdat$buildings, osmdat$open_spaces)
 
     index <- seq_len (nrow (hws_internal))
     hw_polys <- lapply (index, function (i) {
-        xy_i <- as.matrix (hws_internal$geometry [[i]])
+        if (interval <= 0) {
+            xy_i <- hws_internal$geometry [[i]]
+        } else {
+            hw_i <- sf::st_as_sfc (hws_internal [i, ])
+            len <- as.numeric (sf::st_length (hw_i))
+            n <- ceiling (len / interval)
+            if (n < 3) {
+                xy_i <- sf::st_transform (hw_i, 4326) [[1]]
+            } else {
+                ints <- seq (0, len, length.out = n)
+                hw_i <- sf::st_line_interpolate (hw_i, ints) |>
+                    sf::st_combine () |>
+                    sf::st_cast ("LINESTRING") |>
+                    sf::st_transform (4326)
+                xy_i <- hw_i [[1]]
+            }
+            colnames (xy_i) <- c ("lon", "lat")
+        }
+        xy_i <- as.matrix (xy_i)
 
-        ret <- hw_to_polygon (xy_i, all_polys) |>
-            sfheaders::sf_polygon () |>
+        p <- hw_to_polygon (xy_i, all_polys)
+        if (nrow (p) < 4) {
+            # polygons require at least 4 points
+            return (NULL)
+        }
+        ret <- sfheaders::sf_polygon (p) |>
             sf::st_make_valid ()
         if (nrow (sf::st_coordinates (ret)) < 4) {
             # polygons require at least 4 points
