@@ -71,7 +71,6 @@ abbreviate_hwy_names <- function (highway_names, nletters = 2) {
 
 dl_hw_data <- function (highway_names, hw_abbrvs, bbox) {
 
-    message ("Downloading OSM data ...")
     p4s <- NULL
     lens_old <- length (highway_names)
     lens <- 0
@@ -80,7 +79,6 @@ dl_hw_data <- function (highway_names, hw_abbrvs, bbox) {
     while (lens != lens_old) {
 
         indx <- NULL
-        pb <- utils::txtProgressBar (max = 1, style = 3)
         # style = 3 shows start and end positions
         for (i in seq (highway_names)) {
 
@@ -92,7 +90,6 @@ dl_hw_data <- function (highway_names, hw_abbrvs, bbox) {
                     indx <- c (indx, i)
                 }
             }
-            utils::setTxtProgressBar (pb, i / length (highway_names))
         }
         lens <- rep (0, length (indx))
         for (i in seq (indx)) {
@@ -111,13 +108,12 @@ dl_hw_data <- function (highway_names, hw_abbrvs, bbox) {
             )$proj4string
         }
         rm (dat)
-        close (pb)
         lens_old <- lens
     }
     if (lens == 0) {
-        stop ("No data able to be extracted")
+        cli::cli_abort ("No data able to be extracted")
     } else if (lens < length (highway_names)) {
-        message ("Unable to download all requested data.")
+        cli::cli_alert_info ("Unable to download all requested data.")
     }
 
     list ("p4s" = p4s, "indx" = indx)

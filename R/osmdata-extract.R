@@ -12,10 +12,21 @@
 #' @export
 sb_osmdata_extract <- function (bbox, hw_names, outer = TRUE) {
 
+    cli::cli_alert_info ("Extracting surrounding street network...")
     bounding_poly <- extract_bounding_polygon (bbox, hw_names, outer)
+    cli::cli_alert_success ("Extracted surrounding street network.")
+
+    cli::cli_alert_info ("Extracting network within superblock...")
     highways <- extract_osm_highways (bbox, bounding_poly)
+    cli::cli_alert_success ("Extracted network within superblock.")
+
+    cli::cli_alert_info ("Extracting building data...")
     buildings <- extract_osm_buildings (bbox, bounding_poly)
+    cli::cli_alert_success ("Extracted building data.")
+
+    cli::cli_alert_info ("Extracting data on open public spaces...")
     open_spaces <- extract_osm_open_spaces (bbox, bounding_poly)
+    cli::cli_alert_success ("Extracted data on open public spaces.")
 
     list (
         bbox = bbox,
