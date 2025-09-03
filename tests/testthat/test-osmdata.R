@@ -9,15 +9,16 @@ test_that ("osm extraction", {
     )
 
     # osmdata calls are memoised, so store as mock results here
+    bounding_poly <- httptest2::with_mock_dir ("osm-poly", {
+        extract_bounding_polygon (bbox, hw_names)
+    })
+
     withr::with_envvar (
         list ("SUPERBLOCK_TESTS" = "true"),
-        bounding_poly <- httptest2::with_mock_dir ("osm-poly", {
-            extract_bounding_polygon (bbox, hw_names)
+        highways <- httptest2::with_mock_dir ("osm-hw", {
+            extract_osm_highways (bbox, bounding_poly)
         })
     )
-    # highways <- httptest2::with_mock_dir ("osm-hw", {
-    #     extract_osm_highways (bbox, bounding_poly)
-    # })
     # buildings <- httptest2::with_mock_dir ("osm-bldg", {
     #     extract_osm_buildings (bbox, bounding_poly)
     # })
