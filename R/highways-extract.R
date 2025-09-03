@@ -134,13 +134,15 @@ dl_hw_data <- function (highway_names, hw_abbrvs, bbox) {
 #' @noRd
 extract_highway <- function (name = "", bbox) {
 
-    qry <- osmdata::opq (bbox = bbox)
-    qry <- osmdata::add_osm_feature (qry, key = "highway")
-    qry <- osmdata::add_osm_feature (qry,
-        key = "name", value = name,
-        key_exact = FALSE, value_exact = FALSE,
-        match_case = FALSE
-    )
+    qry <- osmdata::opq (bbox = bbox) |>
+        osmdata::add_osm_feature (key = "highway") |>
+        osmdata::add_osm_feature (
+            key = "name",
+            value = name,
+            key_exact = FALSE,
+            value_exact = FALSE,
+            match_case = FALSE
+        )
 
-    osmdata::osmdata_sf (qry)$osm_lines
+    res <- m_osmdata_sf (qry)$osm_lines
 }
