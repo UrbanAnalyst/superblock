@@ -8,26 +8,7 @@ test_that ("osm extraction", {
         "Schillerstraße"
     )
 
-    # osmdata calls are memoised, so store as mock results here
-    bounding_poly <- httptest2::with_mock_dir ("osm-poly", {
-        extract_bounding_polygon (bbox, hw_names)
-    })
-
-    highways <- withr::with_envvar (
-        list ("SUPERBLOCK_TESTS" = "true"),
-        httptest2::with_mock_dir ("osm-hw", {
-            extract_osm_highways (bbox, bounding_poly)
-        })
-    )
-    buildings <- withr::with_envvar (
-        list ("SUPERBLOCK_TESTS" = "true"),
-        httptest2::with_mock_dir ("osm-bldg", {
-            extract_osm_buildings (bbox, bounding_poly)
-        })
-    )
-    open_spaces <- httptest2::with_mock_dir ("osm-open", {
-        extract_osm_open_spaces (bbox, bounding_poly)
-    })
+    memoise_osmdata_calls (bbox, hw_names)
 
     osmdat <- withr::with_envvar (
         list ("SUPERBLOCK_TESTS" = "true"),
@@ -40,4 +21,42 @@ test_that ("osm extraction", {
         "buildings", "open_spaces"
     )
     expect_named (osmdat, nms)
+
+    expect_type (osmdat$bbox, "double")
+    expect_length (osmdat$bbox, 4L)
+
+    expect_identical (hw_names, osmdat$hw_names)
+
+    expect_s3_class (osmdat$bounding_poly, "sf")
+    expect_named (osmdat$bounding_poly, "geometry")
+    expect_equal (nrow (osmdat$bounding_poly), 1L)
+    # not expect equal because geometry type is a factor:
+    expect_true (sf::st_geometry_type (osmdat$bounding_poly) == "POLYGON")
+
+    expect_s3_class (osmdat$highways, "sf")
+    expect_gt (nrow (osmdat$highways), 2L)
+    expect_gt (ncol (osmdat$highways), 5L)
+    expect_true (
+        all (c ("osm_id", "name", "highway", "geometry") %in%
+            names (osmdat$highways))
+    )
+    geom_types <- sf::st_geometry_type (osmdat$highways)
+    expect_true (all (geom_types == "LINESTRING"))
+
+    expect_s3_class (osmdat$buildings, "sf")
+    expect_gt (nrow (osmdat$buildings), 2L)
+    expect_gt (ncol (osmdat$buildings), 5L)
+    expect_true (
+        all (c ("osm_id", "addr:street", "geometry") %in%
+            names (osmdat$buildings))
+    )
+    geom_types <- sf::st_geometry_type (osmdat$buildings)
+    expect_true (all (geom_types == "POLYGON"))
+
+    expect_s3_class (osmdat$open_spaces, "sf")
+    expect_equal (nrow (osmdat$open_spaces), 0L) # There are none
+    expect_true (
+        all (c ("osm_id", "name", "geometry") %in%
+            names (osmdat$open_spaces))
+    )
 })
