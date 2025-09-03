@@ -104,11 +104,16 @@ extract_osm_open_spaces <- function (bbox, bounding_poly) {
     # Then reduce to enclosing polygons:
     index <- sf::st_intersects (open_spaces)
     index_to_merge <- sort (unique (unlist (lapply (index, function (i) i [-1]))))
-    index_to_keep <- seq_len (nrow (open_spaces)) [-index_to_merge]
-    for (i in index_to_keep) {
-        index_i <- index [[i]]
-        # open_spaces [i, ] <- sf::st_union (open_spaces [index_i, ])
-        open_spaces$geometry [i] <- sf::st_union (open_spaces$geometry [index_i])
+    if (length (index_to_merge) > 0L) {
+
+        index_to_keep <- seq_len (nrow (open_spaces)) [-index_to_merge]
+        for (i in index_to_keep) {
+            index_i <- index [[i]]
+            # open_spaces [i, ] <- sf::st_union (open_spaces [index_i, ])
+            open_spaces$geometry [i] <- sf::st_union (open_spaces$geometry [index_i])
+        }
+        open_spaces <- open_spaces [index_to_keep, ]
     }
-    open_spaces [index_to_keep, ]
+
+    return (open_spaces)
 }
