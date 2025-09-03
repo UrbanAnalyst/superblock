@@ -45,11 +45,13 @@ extract_bounding_polygon <- function (bbox, hw_names, outer = TRUE) {
     sf::st_sf (geometry = p)
 }
 
+m_osmdata_sf <- memoise::memoise (osmdata::osmdata_sf)
+
 extract_osm_highways <- function (bbox, bounding_poly) {
 
     dat <- osmdata::opq (bbox) |>
         osmdata::add_osm_feature (key = "highway") |>
-        osmdata::osmdata_sf ()
+        m_osmdata_sf ()
 
     index <- sf::st_within (dat$osm_lines$geometry, bounding_poly, sparse = FALSE)
     index <- which (index [, 1])
@@ -81,7 +83,7 @@ extract_osm_buildings <- function (bbox, bounding_poly) {
 
     dat <- osmdata::opq (bbox) |>
         osmdata::add_osm_feature (key = "building") |>
-        osmdata::osmdata_sf ()
+        m_osmdata_sf ()
     index <- sf::st_within (dat$osm_polygons, bounding_poly, sparse = FALSE)
     dat$osm_polygons [which (index [, 1]), ]
 }
@@ -93,7 +95,7 @@ extract_osm_open_spaces <- function (bbox, bounding_poly) {
             leisure = c ("park", "playground"),
             natural = NULL
         )) |>
-        osmdata::osmdata_sf ()
+        m_osmdata_sf ()
 
     index <- sf::st_within (dat$osm_polygons, bounding_poly, sparse = FALSE)
     open_spaces <- dat$osm_polygons [which (index [, 1]), ]

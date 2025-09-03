@@ -1,6 +1,6 @@
 Package: superblock
 Title: Analyses of potential superblock
-Version: 0.1.0.003
+Version: 0.1.0.004
 Authors@R: 
     person(given = "Mark",
            family = "Padgham",
@@ -16,6 +16,7 @@ Imports:
     dodgr,
     geodist,
     ggm,
+    memoise,
     osmdata,
     sf,
     sfheaders,
