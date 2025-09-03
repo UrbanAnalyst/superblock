@@ -13,21 +13,31 @@ test_that ("osm extraction", {
         extract_bounding_polygon (bbox, hw_names)
     })
 
-    withr::with_envvar (
+    highways <- withr::with_envvar (
         list ("SUPERBLOCK_TESTS" = "true"),
-        highways <- httptest2::with_mock_dir ("osm-hw", {
+        httptest2::with_mock_dir ("osm-hw", {
             extract_osm_highways (bbox, bounding_poly)
         })
     )
-    withr::with_envvar (
+    buildings <- withr::with_envvar (
         list ("SUPERBLOCK_TESTS" = "true"),
-        buildings <- httptest2::with_mock_dir ("osm-bldg", {
+        httptest2::with_mock_dir ("osm-bldg", {
             extract_osm_buildings (bbox, bounding_poly)
         })
     )
-    # open_spaces <- httptest2::with_mock_dir ("osm-open", {
-    #     extract_osm_open_spaces (bbox, bounding_poly)
-    # })
+    open_spaces <- httptest2::with_mock_dir ("osm-open", {
+        extract_osm_open_spaces (bbox, bounding_poly)
+    })
 
-    # osmdat <- sb_osmdata_extract (bbox, hw_names)
+    osmdat <- withr::with_envvar (
+        list ("SUPERBLOCK_TESTS" = "true"),
+        sb_osmdata_extract (bbox, hw_names)
+    )
+
+    expect_type (osmdat, "list")
+    nms <- c (
+        "bbox", "hw_names", "bounding_poly", "highways",
+        "buildings", "open_spaces"
+    )
+    expect_named (osmdat, nms)
 })
