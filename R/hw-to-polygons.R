@@ -38,9 +38,9 @@ hws_to_polygons <- function (osmdat, interval = 10) {
                     sf::st_transform (4326)
                 xy_i <- hw_i [[1]]
             }
-            colnames (xy_i) <- c ("lon", "lat")
         }
         xy_i <- as.matrix (xy_i)
+        colnames (xy_i) <- c ("lon", "lat")
 
         p <- hw_to_polygon (xy_i, all_polys)
         if (nrow (p) < 4) {
