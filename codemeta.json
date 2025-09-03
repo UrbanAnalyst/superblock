@@ -7,7 +7,7 @@
   "codeRepository": "https://github.com/UrbanAnalyst/superblock-ms",
   "issueTracker": "https://github.com/UrbanAnalyst/superblock-ms/issues",
   "license": "https://spdx.org/licenses/GPL-3.0",
-  "version": "0.0.1.018",
+  "version": "0.0.1.19",
   "programmingLanguage": {
     "@type": "ComputerLanguage",
     "name": "R",
@@ -33,6 +33,18 @@
   "softwareRequirements": {
     "1": {
       "@type": "SoftwareApplication",
+      "identifier": "cli",
+      "name": "cli",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=cli"
+    },
+    "2": {
+      "@type": "SoftwareApplication",
       "identifier": "dplyr",
       "name": "dplyr",
       "provider": {
@@ -43,7 +55,7 @@
       },
       "sameAs": "https://CRAN.R-project.org/package=dplyr"
     },
-    "2": {
+    "3": {
       "@type": "SoftwareApplication",
       "identifier": "dodgr",
       "name": "dodgr",
@@ -55,7 +67,7 @@
       },
       "sameAs": "https://CRAN.R-project.org/package=dodgr"
     },
-    "3": {
+    "4": {
       "@type": "SoftwareApplication",
       "identifier": "geodist",
       "name": "geodist",
@@ -67,7 +79,7 @@
       },
       "sameAs": "https://CRAN.R-project.org/package=geodist"
     },
-    "4": {
+    "5": {
       "@type": "SoftwareApplication",
       "identifier": "ggm",
       "name": "ggm",
@@ -79,7 +91,7 @@
       },
       "sameAs": "https://CRAN.R-project.org/package=ggm"
     },
-    "5": {
+    "6": {
       "@type": "SoftwareApplication",
       "identifier": "osmdata",
       "name": "osmdata",
@@ -91,7 +103,7 @@
       },
       "sameAs": "https://CRAN.R-project.org/package=osmdata"
     },
-    "6": {
+    "7": {
       "@type": "SoftwareApplication",
       "identifier": "sf",
       "name": "sf",
@@ -103,7 +115,7 @@
       },
       "sameAs": "https://CRAN.R-project.org/package=sf"
     },
-    "7": {
+    "8": {
       "@type": "SoftwareApplication",
       "identifier": "sfheaders",
       "name": "sfheaders",
@@ -115,7 +127,7 @@
       },
       "sameAs": "https://CRAN.R-project.org/package=sfheaders"
     },
-    "8": {
+    "9": {
       "@type": "SoftwareApplication",
       "identifier": "units",
       "name": "units",
@@ -127,7 +139,7 @@
       },
       "sameAs": "https://CRAN.R-project.org/package=units"
     },
-    "SystemRequirements": {}
+    "SystemRequirements": null
   },
-  "fileSize": "144.84KB"
+  "fileSize": "146.629KB"
 }
