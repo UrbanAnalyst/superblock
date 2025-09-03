@@ -1,4 +1,5 @@
 #' @keywords internal
+#' @importFrom memoise memoise
 #' @aliases superblock-package
 "_PACKAGE"
 

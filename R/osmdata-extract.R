@@ -12,10 +12,21 @@
 #' @export
 sb_osmdata_extract <- function (bbox, hw_names, outer = TRUE) {
 
+    cli::cli_alert_info ("Extracting surrounding street network...")
     bounding_poly <- extract_bounding_polygon (bbox, hw_names, outer)
+    cli::cli_alert_success ("Extracted surrounding street network.")
+
+    cli::cli_alert_info ("Extracting network within superblock...")
     highways <- extract_osm_highways (bbox, bounding_poly)
+    cli::cli_alert_success ("Extracted network within superblock.")
+
+    cli::cli_alert_info ("Extracting building data...")
     buildings <- extract_osm_buildings (bbox, bounding_poly)
+    cli::cli_alert_success ("Extracted building data.")
+
+    cli::cli_alert_info ("Extracting data on open public spaces...")
     open_spaces <- extract_osm_open_spaces (bbox, bounding_poly)
+    cli::cli_alert_success ("Extracted data on open public spaces.")
 
     list (
         bbox = bbox,
@@ -34,11 +45,20 @@ extract_bounding_polygon <- function (bbox, hw_names, outer = TRUE) {
     sf::st_sf (geometry = p)
 }
 
+m_osmdata_sf <- memoise::memoise (osmdata::osmdata_sf)
+
 extract_osm_highways <- function (bbox, bounding_poly) {
 
-    dat <- osmdata::opq (bbox) |>
-        osmdata::add_osm_feature (key = "highway") |>
-        osmdata::osmdata_sf ()
+    is_test_env <- identical (Sys.getenv ("SUPERBLOCK_TESTS", "nope"), "true")
+    if (is_test_env) {
+        q <- osmdata::opq (bbox) |>
+            osmdata::add_osm_feature (key = "highway", value = "residential")
+    } else {
+        q <- osmdata::opq (bbox) |>
+            osmdata::add_osm_feature (key = "highway")
+    }
+
+    dat <- m_osmdata_sf (q)
 
     index <- sf::st_within (dat$osm_lines$geometry, bounding_poly, sparse = FALSE)
     index <- which (index [, 1])
@@ -68,9 +88,15 @@ reduce_osm_highways <- function (hws, hw_names) {
 
 extract_osm_buildings <- function (bbox, bounding_poly) {
 
-    dat <- osmdata::opq (bbox) |>
-        osmdata::add_osm_feature (key = "building") |>
-        osmdata::osmdata_sf ()
+    q <- osmdata::opq (bbox) |>
+        osmdata::add_osm_feature (key = "building")
+
+    is_test_env <- identical (Sys.getenv ("SUPERBLOCK_TESTS", "nope"), "true")
+    if (is_test_env) {
+        q <- osmdata::add_osm_feature (q, key = "addr:housenumber", value = 2:6)
+    }
+
+    dat <- m_osmdata_sf (q)
     index <- sf::st_within (dat$osm_polygons, bounding_poly, sparse = FALSE)
     dat$osm_polygons [which (index [, 1]), ]
 }
@@ -82,7 +108,7 @@ extract_osm_open_spaces <- function (bbox, bounding_poly) {
             leisure = c ("park", "playground"),
             natural = NULL
         )) |>
-        osmdata::osmdata_sf ()
+        m_osmdata_sf ()
 
     index <- sf::st_within (dat$osm_polygons, bounding_poly, sparse = FALSE)
     open_spaces <- dat$osm_polygons [which (index [, 1]), ]
@@ -91,11 +117,16 @@ extract_osm_open_spaces <- function (bbox, bounding_poly) {
     # Then reduce to enclosing polygons:
     index <- sf::st_intersects (open_spaces)
     index_to_merge <- sort (unique (unlist (lapply (index, function (i) i [-1]))))
-    index_to_keep <- seq_len (nrow (open_spaces)) [-index_to_merge]
-    for (i in index_to_keep) {
-        index_i <- index [[i]]
-        # open_spaces [i, ] <- sf::st_union (open_spaces [index_i, ])
-        open_spaces$geometry [i] <- sf::st_union (open_spaces$geometry [index_i])
+    if (length (index_to_merge) > 0L) {
+
+        index_to_keep <- seq_len (nrow (open_spaces)) [-index_to_merge]
+        for (i in index_to_keep) {
+            index_i <- index [[i]]
+            # open_spaces [i, ] <- sf::st_union (open_spaces [index_i, ])
+            open_spaces$geometry [i] <- sf::st_union (open_spaces$geometry [index_i])
+        }
+        open_spaces <- open_spaces [index_to_keep, ]
     }
-    open_spaces [index_to_keep, ]
+
+    return (open_spaces)
 }

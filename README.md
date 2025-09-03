@@ -1,5 +1,8 @@
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
+[![R-CMD-check](https://github.com/UrbanAnalyst/superblock/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/UrbanAnalyst/superblock/actions/workflows/R-CMD-check.yaml)
+[![Codecov test coverage](https://codecov.io/gh/UrbanAnalyst/superblock/graph/badge.svg)](https://app.codecov.io/gh/UrbanAnalyst/superblock)
+
 # superblock
 
 An R package to analyse potential

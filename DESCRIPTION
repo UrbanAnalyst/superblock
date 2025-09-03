@@ -1,6 +1,6 @@
 Package: superblock
 Title: Analyses of potential superblock
-Version: 0.1.0.001
+Version: 0.1.0.012
 Authors@R: 
     person(given = "Mark",
            family = "Padgham",
@@ -10,16 +10,23 @@ Description: Analyses of potential superblocks.
 License: GPL-3
 URL: https://github.com/UrbanAnalyst/superblock-ms
 BugReports: https://github.com/UrbanAnalyst/superblock-ms/issues
+Depends: 
+    R (>= 4.1.0)
 Imports:
     cli,
     dplyr,
     dodgr,
     geodist,
     ggm,
+    memoise,
     osmdata,
     sf,
     sfheaders,
     units
+Suggests:
+    httptest2,
+    testthat (>= 3.0.0),
+    withr
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
