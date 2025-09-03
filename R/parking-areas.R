@@ -11,7 +11,7 @@ car_parking_areas <- function (osmdat, add_parking_osm_ids = NULL) {
     if (!is.null (add_parking_osm_ids)) {
         index <- which (as.numeric (hws$parking_area) > 0)
         parking_mean <- mean (hws$parking_area [index])
-        index <- match (add_parking, hws$osm_id)
+        index <- match (add_parking_osm_ids, hws$osm_id)
         hws$parking_area [index] <- parking_mean
     }
 

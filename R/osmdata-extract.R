@@ -75,7 +75,7 @@ extract_osm_buildings <- function (bbox, bounding_poly) {
     dat$osm_polygons [which (index [, 1]), ]
 }
 
-extract_osm_open_spaces <- function (bb0x, bounding_poly) {
+extract_osm_open_spaces <- function (bbox, bounding_poly) {
 
     dat <- osmdata::opq (bbox) |>
         osmdata::add_osm_features (list (

@@ -129,11 +129,11 @@ extend_xy_to_bb <- function (xy, bb) {
     # Head, with initial "-" because head is 1:2, but need sequence 2:1:
     xy_add <- -apply (utils::head (xy, n = 2), 2, diff)
     m <- get_mult (xy_add, bb, xy)
-    xy <- rbind (head (xy, n = 1) + m * xy_add, xy)
+    xy <- rbind (utils::head (xy, n = 1) + m * xy_add, xy)
     # Tail:
     xy_add <- apply (utils::tail (xy, n = 2), 2, diff)
     m <- get_mult (xy_add, bb, xy)
-    xy <- rbind (xy, tail (xy, n = 1) + m * xy_add)
+    xy <- rbind (xy, utils::tail (xy, n = 1) + m * xy_add)
 
     xrange <- range (xy [, 1])
     yrange <- range (xy [, 2])

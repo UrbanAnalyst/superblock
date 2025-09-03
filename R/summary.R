@@ -17,7 +17,7 @@ sb_summary <- function (osmdat, hw_polygons = NULL, add_parking_osm_ids = NULL) 
     a_tot_f <- format (a_tot, digits = 3)
     a_bldg <- as.numeric (sum (sf::st_area (osmdat$buildings))) / 10000
     a_open <- as.numeric (sum (sf::st_area (osmdat$open_spaces))) / 10000
-    a_hw <- as.numeric (sum (sf::st_area (hw_polys))) / 10000
+    a_hw <- as.numeric (sum (sf::st_area (hw_polygons))) / 10000
     a_road <- as.numeric (sum (hws$road_area)) / 10000
     a_parking <- as.numeric (sum (hws$parking_area)) / 10000
 
