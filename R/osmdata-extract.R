@@ -13,7 +13,7 @@
 sb_osmdata_extract <- function (bbox, hw_names, outer = TRUE) {
 
     bounding_poly <- extract_bounding_polygon (bbox, hw_names, outer)
-    hws <- extract_osm_highways (bbox, bounding_poly)
+    highways <- extract_osm_highways (bbox, bounding_poly)
     buildings <- extract_osm_buildings (bbox, bounding_poly)
     open_spaces <- extract_osm_open_spaces (bbox, bounding_poly)
 
@@ -28,7 +28,7 @@ sb_osmdata_extract <- function (bbox, hw_names, outer = TRUE) {
 }
 
 extract_bounding_polygon <- function (bbox, hw_names, outer = TRUE) {
-    p <- connect_highways (highways = highways, bbox = bbox, outer = outer)
+    p <- connect_highways (highways = hw_names, bbox = bbox, outer = outer)
     p <- sf::st_polygon (list (p)) |>
         sf::st_sfc (crs = 4326)
     sf::st_sf (geometry = p)
