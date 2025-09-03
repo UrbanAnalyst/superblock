@@ -63,9 +63,13 @@ hw_to_polygon <- function (xy, polygons) {
     line1 <- get_nearest_poly_points (xy0, these_polys)
     line2 <- get_nearest_poly_points (xy0, those_polys)
 
-    this_poly <- rbind (line1, apply (line2, 2, rev), line1 [1, ])
+    this_poly <- rbind (line1, apply (line2, 2, rev)) |>
+        unique () |>
+        rbind (line1 [1, ])
+
     # this_poly_sf <- sfheaders::sf_linestring (this_poly) |> sf::st_sf (crs = 4326)
     # mapdeck::mapdeck () |> mapdeck::add_path (this_poly_sf)
+
     return (this_poly)
 }
 
