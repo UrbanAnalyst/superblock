@@ -22,7 +22,15 @@ helper_extra_highway <- function (osmdat) {
         sf::st_combine () |>
         sf::st_cast ("LINESTRING") |>
         sf::st_transform (4326)
-    hw <- sf::st_sf (name = "name", highway = "residential", geometry = hw)
+
+    hw <- sf::st_sf (
+        name = "name",
+        highway = "residential",
+        lanes = 1,
+        "parking:left:orientation" = "diagonal",
+        "parking:right:orientation" = "diagonal",
+        geometry = hw
+    )
     osmdat$highways <- dplyr::bind_rows (osmdat$highways, hw)
 
     return (osmdat)

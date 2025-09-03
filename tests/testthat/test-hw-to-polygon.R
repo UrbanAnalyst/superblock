@@ -1,4 +1,4 @@
-test_that ("osm extraction", {
+test_that ("hw-to-polygon", {
 
     bbox <- c (7.6413, 51.9553, 7.6454, 51.9567)
     hw_names <- c (

@@ -31,7 +31,7 @@ parking_structure <- function (hws) {
 
         widths <- c (3, 4, 5) # (parallel, diagonal, perpendicular)
 
-        parking_here <- parking [, grep (side, names (parking))]
+        parking_here <- parking [, grep (side, names (parking)), drop = FALSE]
         dirs <- c ("no|false", "parallel", "diagonal", "perpendicular")
         conditions <- lapply (dirs, function (d) {
             apply (
