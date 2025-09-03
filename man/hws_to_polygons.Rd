@@ -5,10 +5,15 @@
 \title{Convert all highway lines into polygons bounded by the surrounding polygon
 geometry of buildings and open spaces.}
 \usage{
-hws_to_polygons(osmdat)
+hws_to_polygons(osmdat, interval = 10)
 }
 \arguments{
 \item{osmdat}{Object returned from \link{sb_osmdata_extract}.}
+
+\item{interval}{in metres to interpolate highways and project onto nearby
+polygons. Values of 0 or less will not interpolate, and polygons will only
+be defined by using points at which lines are defined within Open Street
+Map. This may reduce the accuracy of resultant polygons.}
 }
 \value{
 An \pkg{sf} \code{data.frame} of polygons tracing polygons around all

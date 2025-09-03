@@ -5,7 +5,7 @@
 #' @param interval in metres to interpolate highways and project onto nearby
 #' polygons. Values of 0 or less will not interpolate, and polygons will only
 #' be defined by using points at which lines are defined within Open Street
-#' Map. This may recuce the accuracy of resultant polygons.
+#' Map. This may reduce the accuracy of resultant polygons.
 #' @return An \pkg{sf} `data.frame` of polygons tracing polygons around all
 #' interior streets until the edges of surrounding polygons.
 #' @export
