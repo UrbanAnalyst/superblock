@@ -86,7 +86,7 @@ connect_highways <- function (highways, bbox, outer = TRUE) {
         stop ("A bounding box must be given")
     }
     if (length (outer) == 1L) {
-        outer <- rep (outer, length (ways))
+        outer <- rep (outer, length (highways))
     }
     stopifnot (length (outer) == length (highways))
 
