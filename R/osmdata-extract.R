@@ -28,13 +28,18 @@ sb_osmdata_extract <- function (bbox, hw_names, outer = TRUE) {
     open_spaces <- extract_osm_open_spaces (bbox, bounding_poly)
     cli::cli_alert_success ("Extracted data on open public spaces.")
 
+    cli::cli_alert_info ("Extracting data on parking areas...")
+    parking <- extract_osm_parking_areas (bbox, bounding_poly)
+    cli::cli_alert_success ("Extracted data on parking areas.")
+
     list (
         bbox = bbox,
         hw_names = hw_names,
         bounding_poly = bounding_poly,
         highways = highways,
         buildings = buildings,
-        open_spaces = open_spaces
+        open_spaces = open_spaces,
+        parking = parking
     )
 }
 
@@ -129,4 +134,22 @@ extract_osm_open_spaces <- function (bbox, bounding_poly) {
     }
 
     return (open_spaces)
+}
+
+extract_osm_parking_areas <- function (bbox, bounding_polyg) {
+
+    dat <- osmdata::opq (bbox) |>
+        osmdata::add_osm_features (list (
+            amenity = "parking",
+            natural = NULL
+        )) |>
+        m_osmdata_sf ()
+
+    index <- sf::st_within (dat$osm_polygons, bounding_poly, sparse = FALSE)
+    parking <- dat$osm_polygons [which (index [, 1]), ]
+    index <- which (
+        parking$amenity == "parking" &
+            grepl ("permissive|yes", parking$access, ignore.case = TRUE)
+    )
+    parking <- parking [index, ]
 }
