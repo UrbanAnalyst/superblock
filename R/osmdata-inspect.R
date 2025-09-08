@@ -36,3 +36,42 @@ no_parking_ways <- function (osmdat, min_len = 20, browse = TRUE) {
 
     invisible (ret)
 }
+
+#' Identify and optionally browse Open Street Map (OSM) buildings with missing
+#' data on numbers of levels.
+#'
+#' @inheritParams no_parking_ways
+#' @export
+no_building_floors <- function (osmdat, browse = TRUE) {
+
+    these_types <- c ("apartments", "residential", "yes")
+    b <- dplyr::filter (osmdat$buildings, building %in% these_types)
+
+    levels <- b$`building:levels`
+    roof <- b$`roof:levels`
+
+    index <- which (is.na (b$`building:levels`))
+    ret <- data.frame (
+        osm_id = character (0),
+        url = character (0),
+        levels = double (0),
+        roof = double (0)
+    )
+    if (length (index) > 0) {
+        osm_id <- b$osm_id [index]
+        urls <- paste0 ("https://openstreetmap.org/way/", osm_id)
+        if (browse) {
+            val <- lapply (urls, utils::browseURL)
+        }
+
+        ret <- data.frame (
+            osm_id = osm_id,
+            url = urls,
+            levels = levels [index],
+            roof = roof [index]
+        )
+    }
+
+    invisible (ret)
+
+}
