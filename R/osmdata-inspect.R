@@ -44,6 +44,9 @@ no_parking_ways <- function (osmdat, min_len = 20, browse = TRUE) {
 #' @export
 no_building_floors <- function (osmdat, browse = TRUE) {
 
+    # suppress no vis binding note:
+    building <- NULL
+
     these_types <- c ("apartments", "residential", "yes")
     b <- dplyr::filter (osmdat$buildings, building %in% these_types)
 
