@@ -17,7 +17,11 @@ no_parking_ways <- function (osmdat, min_len = 20, browse = TRUE) {
     parking <- car_parking_areas (osmdat)
 
     lens <- as.numeric (sf::st_length (parking))
-    index <- which (as.numeric (parking$parking_area) == 0 & lens > min_len)
+    index <- which (
+        as.numeric (parking$parking_area) == 0 &
+            is.na (parking$parking_prohibited) &
+            lens > min_len
+    )
 
     ret <- data.frame (osm_id = character (0), url = character (0))
     if (length (index) > 0) {

@@ -47,14 +47,27 @@ parking_structure <- function (hws) {
             parking_space [which (conditions [, i])] <- widths [i = 1L]
         }
 
-        return (parking_space)
+        # And set any "no" or "false" flags to no parking space:
+        parking_prohibited <- conditions [, 1]
+
+        return (cbind (parking_space, parking_prohibited))
     }
 
-    parking_sides <- side_dir (parking, "left") + side_dir (parking, "right")
-    parking_both <- side_dir (parking, "both") * 2
-    parking_space <- apply (cbind (parking_sides, parking_both), 1, max)
-    parking_area <- sf::st_length (hws) * units::set_units (parking_space, "m")
+    parking <- lapply (
+        c ("left", "right", "both"),
+        function (i) side_dir (parking, i)
+    )
 
-    hws$parking_area <- parking_area
+    parking_prohibited <- lapply (parking, function (i) which (i [, 2] == 1))
+    hws$parking_prohibited <- NA_character_
+    hws$parking_prohibited [parking_prohibited [[1]]] <- "left"
+    hws$parking_prohibited [parking_prohibited [[2]]] <- "right"
+    hws$parking_prohibited [parking_prohibited [[3]]] <- "both"
+
+    parking_sides <- parking [[1]] [, 1] + parking [[2]] [, 1]
+    parking_both <- parking [[3]] [, 1] * 2
+    parking_space <- apply (cbind (parking_sides, parking_both), 1, max)
+    hws$parking_area <- sf::st_length (hws) * units::set_units (parking_space, "m")
+
     return (hws)
 }
