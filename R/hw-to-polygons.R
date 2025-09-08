@@ -63,6 +63,7 @@ hws_to_polygons <- function (osmdat, interval = 10) {
 
     g <- do.call (rbind, hw_polys) |>
         sf::st_sf (crs = 4326) |>
+        dplyr::bind_rows (osmdat$parking) |>
         sf::st_union () |>
         sf::st_cast ("POLYGON")
     sf::st_sf (geometry = g)
