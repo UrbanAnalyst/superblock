@@ -1,15 +1,18 @@
 # Functions to inspect OSM elements with missing or inadequate data.
 
-#' Browse Open Street Map (OSM) highways with missing parking data.
+#' Identify and optionally browse Open Street Map (OSM) highways with missing
+#' parking data.
 #'
 #' @param osmdat Main object returned by \link{sb_osmdata_extract} function.
 #' @param min_len Minimal length in metres of ways to inspect. Shorter ways are
 #' likely just connector elements which often neither have not require parking
 #' data.
+#' @param browse If `TRUE` (default), open OSM pages for all identified ways in
+#' default web browser.
 #' @return (Invisibly) A `data.frame` object with columns of OSM identifier
 #' values for each identified way, and corresponding URLs.
 #' @export
-browse_no_parking_ways <- function (osmdat, min_len = 20) {
+no_parking_ways <- function (osmdat, min_len = 20, browse = TRUE) {
 
     parking <- car_parking_areas (osmdat)
 
@@ -20,7 +23,9 @@ browse_no_parking_ways <- function (osmdat, min_len = 20) {
     if (length (index) > 0) {
         osm_id <- parking$osm_id [index]
         urls <- paste0 ("https://openstreetmap.org/way/", osm_id)
-        val <- lapply (urls, utils::browseURL)
+        if (browse) {
+            val <- lapply (urls, utils::browseURL)
+        }
 
         ret <- data.frame (osm_id = osm_id, url = urls)
     }
