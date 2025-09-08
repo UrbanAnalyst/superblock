@@ -47,24 +47,27 @@ parking_structure <- function (hws) {
             parking_space [which (conditions [, i])] <- widths [i = 1L]
         }
 
-        return (parking_space)
+        # And set any "no" or "false" flags to no parking space:
+        parking_prohibited <- conditions [, 1]
+
+        return (cbind (parking_space, parking_prohibited))
     }
 
-    parking_sides <- side_dir (parking, "left") + side_dir (parking, "right")
-    parking_both <- side_dir (parking, "both") * 2
+    parking <- lapply (
+        c ("left", "right", "both"),
+        function (i) side_dir (parking, i)
+    )
+
+    parking_prohibited <- lapply (parking, function (i) which (i [, 2] == 1))
+    hws$parking_prohibited <- NA_character_
+    hws$parking_prohibited [parking_prohibited [[1]]] <- "left"
+    hws$parking_prohibited [parking_prohibited [[2]]] <- "right"
+    hws$parking_prohibited [parking_prohibited [[3]]] <- "both"
+
+    parking_sides <- parking [[1]] [, 1] + parking [[2]] [, 1]
+    parking_both <- parking [[3]] [, 1] * 2
     parking_space <- apply (cbind (parking_sides, parking_both), 1, max)
-    parking_area <- sf::st_length (hws) * units::set_units (parking_space, "m")
+    hws$parking_area <- sf::st_length (hws) * units::set_units (parking_space, "m")
 
-    hws$parking_area <- parking_area
     return (hws)
-}
-
-browse_no_parking_ways <- function (parking, min_len = 20) {
-    lens <- as.numeric (sf::st_length (parking))
-    index <- which (as.numeric (parking$parking_area) == 0 & lens > min_len)
-    if (length (index) > 0) {
-        osm_id <- parking$osm_id [index]
-        urls <- paste0 ("https://openstreetmap.org/way/", osm_id)
-        val <- lapply (urls, utils::browseURL)
-    }
 }

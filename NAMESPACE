@@ -3,6 +3,7 @@
 export(connect_highways)
 export(get_bbox)
 export(hws_to_polygons)
+export(no_parking_ways)
 export(sb_osmdata_extract)
 export(sb_summary)
 importFrom(memoise,memoise)
