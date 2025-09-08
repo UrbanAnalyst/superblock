@@ -58,13 +58,3 @@ parking_structure <- function (hws) {
     hws$parking_area <- parking_area
     return (hws)
 }
-
-browse_no_parking_ways <- function (parking, min_len = 20) {
-    lens <- as.numeric (sf::st_length (parking))
-    index <- which (as.numeric (parking$parking_area) == 0 & lens > min_len)
-    if (length (index) > 0) {
-        osm_id <- parking$osm_id [index]
-        urls <- paste0 ("https://openstreetmap.org/way/", osm_id)
-        val <- lapply (urls, utils::browseURL)
-    }
-}

@@ -1,6 +1,6 @@
 Package: superblock
 Title: Analyses of potential superblock
-Version: 0.1.0.021
+Version: 0.1.0.022
 Authors@R: 
     person(given = "Mark",
            family = "Padgham",
@@ -29,5 +29,5 @@ Suggests:
     withr
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.2
+RoxygenNote: 7.3.3
 Config/testthat/edition: 3
