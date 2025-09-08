@@ -32,12 +32,12 @@ sb_summary (osmdat)
 #> • Total area = 22.8 hectares
 #> • Proportion buildings: 36.6%
 #> • Proportion open space: 7.36%
-#> • Proportion roads: 15.7%, of which:
-#>   • 32.5% is for car roads
-#>   • 35.6% is for parked cars, and
-#>   • 31.9% remains for everybody else.
+#> • Proportion roads: 16.4%, of which:
+#>   • 31.1% is for car roads
+#>   • 34.1% is for parked cars, and
+#>   • 34.8% remains for everybody else.
 #> 
-#> • Total proportion of public space: 12.4
-#> • Total proportion of public space as superblock: 23.1
-#> • Increase in public space as superblock: 87%
+#> • Total proportion of public space: 13.1
+#> • Total proportion of public space as superblock: 23.8
+#> • Increase in public space as superblock: 82%
 ```
