@@ -153,3 +153,54 @@ dodgr_wp_to_20 <- function (max_speed = 20) {
 
     return (f)
 }
+
+#' Sample `n` values from a series, `d`, and return the expected minimum of the
+#' unsampled values.
+#'
+#' If `d` represent all possible distances to car parking spaces, this expected
+#' minimum is the expected distance to travel given that `n` spaces are
+#' occupied.
+#' @noRd
+expected_min_d <- function (d, n = 2) {
+
+    if (n <= 0 || n >= length (d)) {
+        stop ("Sample size n must be between 1 and N-1")
+    }
+
+    freq_table <- table (d)
+    unique_vals <- as.numeric (names (freq_table))
+    freq_counts <- as.numeric (freq_table)
+
+    sorted_order <- order (unique_vals)
+    unique_vals <- unique_vals [sorted_order]
+    freq_counts <- freq_counts [sorted_order]
+
+    ntot <- length (data)
+    comb_total <- choose (ntot, n)
+    val <- 0.0
+
+    for (i in seq (1, length (unique_vals))) {
+
+        v <- unique_vals [i]
+        n_to_v <- sum (freq_counts [1:i])
+        n_lt_v <- ifelse (i > 1, sum (freq_counts [1:(i - 1)]), 0)
+
+        if (n_lt_v > n) {
+            prob_all_n_lt_sampled <- 0
+        } else {
+            prob_all_n_lt_sampled <- choose (ntot - n_lt_v, n - n_lt_v) / comb_total
+        }
+
+        if (n_to_v > n) {
+            prob_all_n_sampled <- 0
+        } else {
+            prob_all_n_sampled <- choose (ntot - n_to_v, n - n_to_v) / comb_total
+        }
+
+        p <- prob_all_n_lt_sampled - prob_all_n_sampled
+
+        val <- val + v * p
+    }
+
+    return (val)
+}
