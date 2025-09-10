@@ -8,10 +8,10 @@
       * Proportion open space: 0%
       * Proportion roads: 4.57%, of which:
         * 57.9% is for car roads
-        * 86.8% is for parked cars, and
-        * -44.7% remains for everybody else.
+        * 116% is for parked cars, and
+        * -73.7% remains for everybody else.
       
-      * Total proportion of public space: -2.04
+      * Total proportion of public space: -3.37
       * Total proportion of public space as superblock: 4.57
-      * Increase in public space as superblock: -324%
+      * Increase in public space as superblock: -236%
 

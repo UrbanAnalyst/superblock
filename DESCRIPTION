@@ -1,6 +1,6 @@
 Package: superblock
 Title: Analyses of potential superblock
-Version: 0.1.0.033
+Version: 0.1.0.034
 Authors@R: 
     person(given = "Mark",
            family = "Padgham",
