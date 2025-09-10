@@ -57,7 +57,7 @@ parking_time_matrix <- function (osmdat) {
     index <- dodgr::match_points_to_verts (v, b [, c ("lon", "lat")])
     b$node_id <- v$id [index]
 
-    tmat <- dodgr::dodgr_dists (net, from = b$node_id, to = b$node_id)
+    tmat <- dodgr::dodgr_times (net, from = b$node_id, to = b$node_id)
     rownames (tmat) <- colnames (tmat) <- b$osm_id
 
     list (buildings = b, tmat = tmat)
