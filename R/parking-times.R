@@ -49,23 +49,29 @@ parking_time_matrix <- function (osmdat) {
     b <- buildings_to_highways (osmdat)
 
     f <- dodgr_wp_to_20 ()
-    net <- dodgr::weight_streetnet (
-        osmdat$dat_sc,
-        wt_profile = "motorcar",
-        wt_profile_file = f,
-        turn_penalty = TRUE
-    )
 
-    v <- dodgr::dodgr_vertices (net)
-    index <- dodgr::match_points_to_verts (v, b [, c ("lon", "lat")])
-    b$node_id <- v$id [index]
+    tmats <- lapply (c ("motorcar", "foot"), function (wp) {
 
-    tmat <- dodgr::dodgr_times (net, from = b$node_id, to = b$node_id)
-    rownames (tmat) <- colnames (tmat) <- b$osm_id
+        net <- dodgr::weight_streetnet (
+            osmdat$dat_sc,
+            wt_profile = wp,
+            wt_profile_file = f,
+            turn_penalty = TRUE
+        )
+
+        v <- dodgr::dodgr_vertices (net)
+        index <- dodgr::match_points_to_verts (v, b [, c ("lon", "lat")])
+        vert_ids <- v$id [index]
+
+        tmat <- dodgr::dodgr_times (net, from = vert_ids, to = vert_ids)
+        rownames (tmat) <- colnames (tmat) <- b$osm_id
+
+        return (tmat)
+    })
 
     file.remove (f)
 
-    list (buildings = b, tmat = tmat)
+    list (buildings = b, tmat_car = tmats [[1]], tmat_foot = tmats [[2]])
 }
 
 #' Set max speed in dodgr weighting profile to 20km/h, reflective of driving

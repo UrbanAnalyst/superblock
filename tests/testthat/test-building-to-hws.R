@@ -24,4 +24,16 @@ test_that ("hw-to-polygon", {
     expect_true (all (b$osm_id %in% osmdat$buildings$osm_id))
     expect_true (all (b$hw_id %in% osmdat$highways$osm_id))
     expect_type (b$n_parking_spaces, "integer")
+
+    dat <- parking_time_matrix (osmdat)
+
+    expect_type (dat, "list")
+    expect_named (dat, c ("buildings", "tmat_car", "tmat_foot"))
+    expect_identical (b, dat$buildings)
+
+    for (what in c ("tmat_car", "tmat_foot")) {
+        expect_type (dat [[what]], "double")
+        expect_length (attr (dat [[what]], "dim"), 2L) # matrix
+        expect_length (unique (attr (dat [[what]], "dim")), 1L) # square
+    }
 })
