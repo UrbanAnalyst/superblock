@@ -50,6 +50,8 @@ parking_time_matrix <- function (osmdat) {
 
     f <- dodgr_wp_to_20 ()
 
+    # Travel times between all pairs of buildings, so between all buildings and
+    # parking spaces.
     tmats <- lapply (c ("motorcar", "foot"), function (wp) {
 
         net <- dodgr::weight_streetnet (
@@ -70,6 +72,61 @@ parking_time_matrix <- function (osmdat) {
     })
 
     file.remove (f)
+
+    # Then to find travel times to major parking facilities, first find for
+    # each building the nearest entry point in the bounding highways.
+    net <- dodgr::weight_streetnet (
+        osmdat$dat_sc,
+        wt_profile = "motorcar",
+        turn_penalty = TRUE
+    )
+    v <- dodgr::dodgr_vertices (net)
+    index <- dodgr::match_points_to_verts (v, b [, c ("lon", "lat")])
+    from_ids <- v$id [index]
+
+    to_pts <- sf::st_coordinates (osmdat$parking_facilities)
+    index <- dodgr::match_points_to_verts (v, to_pts)
+    to_ids <- v$id [index]
+
+    # Then route from buildings to parking facilities, but only start at first
+    # vertex that is not within the bounding polygon.
+    hws_within <- osmdat$highways |>
+        dplyr::filter (!name %in% osmdat$hw_names)
+    nodes_within <- sf::st_coordinates (hws_within) |>
+        rownames ()
+
+    # Only run this if there are parking facilities:
+    if (length (to_ids) > 0L) {
+        paths <- dodgr::dodgr_paths (net, from = from_ids, to = to_ids)
+        path_ends <- lapply (paths, function (i) {
+            ends_i <- lapply (i, function (j) {
+                this_path <- j [which (!j %in% nodes_within)]
+                c (j [1], j [length (j)], this_path [c (1, length (this_path))])
+            })
+            do.call (rbind, ends_i)
+        })
+        path_ends <- data.frame (do.call (rbind, path_ends))
+        rownames (path_ends) <- NULL
+        names (path_ends) <- c ("b_from", "p_to", "b_from_remap", "p_to_remap")
+
+        index <- match (from_ids, path_ends$b_from)
+        from_ids <- path_ends$b_from_remap [index]
+        # Those are then from vertices closest to each building which head directly
+        # to a parking facility.
+
+        tmat <- dodgr::dodgr_times (net, from = from_ids, to = to_ids)
+        tvec <- apply (tmat, 1, min, na.rm = TRUE)
+        parking_ids <- names (tvec)
+        b$time_to_parking <- unname (tvec)
+
+        # Then finally time from parking back to buildings:
+        net <- dodgr::weight_streetnet (
+            osmdat$dat_sc,
+            wt_profile = "foot"
+        )
+        tmat <- dodgr::dodgr_times (net, from = parking_ids, to = to_ids)
+        b$time_from_parking <- apply (tmat, 1, min, na.rm = TRUE)
+    }
 
     list (buildings = b, tmat_car = tmats [[1]], tmat_foot = tmats [[2]])
 }
