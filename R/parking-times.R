@@ -43,3 +43,22 @@ buildings_to_highways <- function (osmdat) {
         n_parking_spaces = p$num_parking_spaces [index]
     )
 }
+
+parking_time_matrix <- function (osmdat) {
+
+    b <- buildings_to_highways (osmdat)
+
+    net <- dodgr::weight_streetnet (
+        osmdat$dat_sc,
+        wt_profile = "motorcar",
+        turn_penalty = TRUE
+    )
+    v <- dodgr::dodgr_vertices (net)
+    index <- dodgr::match_points_to_verts (v, b [, c ("lon", "lat")])
+    b$node_id <- v$id [index]
+
+    tmat <- dodgr::dodgr_dists (net, from = b$node_id, to = b$node_id)
+    rownames (tmat) <- colnames (tmat) <- b$osm_id
+
+    list (buildings = b, tmat = tmat)
+}
