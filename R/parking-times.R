@@ -175,7 +175,7 @@ expected_min_d <- function (d, n = 2) {
     unique_vals <- unique_vals [sorted_order]
     freq_counts <- freq_counts [sorted_order]
 
-    ntot <- length (data)
+    ntot <- length (d)
     comb_total <- choose (ntot, n)
     val <- 0.0
 
