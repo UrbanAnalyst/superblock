@@ -23,7 +23,18 @@ helper_extra_highway <- function (osmdat) {
         sf::st_cast ("LINESTRING") |>
         sf::st_transform (4326)
 
+    # Needs to have OSM id values for the buildings to highways fn to work:
+    make_id <- function (len = 12) {
+        paste0 (sample (0:9, size = len, replace = TRUE), collapse = "")
+    }
+    rownames (hw [[1]]) <- vapply (
+        seq_len (n),
+        function (i) make_id (),
+        character (1L)
+    )
+
     hw <- sf::st_sf (
+        osm_id = make_id (),
         name = "name",
         highway = "residential",
         lanes = "1",
