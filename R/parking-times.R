@@ -34,13 +34,16 @@ buildings_to_highways <- function (osmdat) {
 
     p <- car_parking_areas (osmdat) # add "num_parking_spaces" to hw data
     index <- match (rownames (xy), p$osm_id)
+    index_table <- table (index)
+    index_divisors <- index_table [match (index, names (index_table))]
+    n_spaces <- as.numeric (p$num_parking_spaces [index] / index_divisors)
 
     data.frame (
         osm_id = osmdat$buildings$osm_id,
         hw_id = rownames (xy),
         lon = xy [, 1],
         lat = xy [, 2],
-        n_parking_spaces = p$num_parking_spaces [index]
+        n_parking_spaces = n_spaces
     )
 }
 
