@@ -7,7 +7,7 @@
   "codeRepository": "https://github.com/UrbanAnalyst/superblock-ms",
   "issueTracker": "https://github.com/UrbanAnalyst/superblock-ms/issues",
   "license": "https://spdx.org/licenses/GPL-3.0",
-  "version": "0.1.0.037",
+  "version": "0.1.0.38",
   "programmingLanguage": {
     "@type": "ComputerLanguage",
     "name": "R",
@@ -42,6 +42,18 @@
         "url": "https://cran.r-project.org"
       },
       "sameAs": "https://CRAN.R-project.org/package=httptest2"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "jsonlite",
+      "name": "jsonlite",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=jsonlite"
     },
     {
       "@type": "SoftwareApplication",
@@ -196,7 +208,8 @@
       },
       "sameAs": "https://CRAN.R-project.org/package=units"
     },
-    "SystemRequirements": {}
+    "SystemRequirements": null
   },
-  "fileSize": "355.182KB"
+  "fileSize": "1053.937KB",
+  "contIntegration": ["https://github.com/UrbanAnalyst/superblock/actions/workflows/R-CMD-check.yaml", "https://app.codecov.io/gh/UrbanAnalyst/superblock"]
 }

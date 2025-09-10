@@ -1,6 +1,6 @@
 Package: superblock
 Title: Analyses of potential superblock
-Version: 0.1.0.037
+Version: 0.1.0.038
 Authors@R: 
     person(given = "Mark",
            family = "Padgham",
@@ -25,6 +25,7 @@ Imports:
     units
 Suggests:
     httptest2,
+    jsonlite,
     testthat (>= 3.0.0),
     withr
 Encoding: UTF-8

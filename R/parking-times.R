@@ -48,11 +48,14 @@ parking_time_matrix <- function (osmdat) {
 
     b <- buildings_to_highways (osmdat)
 
+    f <- dodgr_wp_to_20 ()
     net <- dodgr::weight_streetnet (
         osmdat$dat_sc,
         wt_profile = "motorcar",
+        wt_profile_file = f,
         turn_penalty = TRUE
     )
+
     v <- dodgr::dodgr_vertices (net)
     index <- dodgr::match_points_to_verts (v, b [, c ("lon", "lat")])
     b$node_id <- v$id [index]
@@ -60,5 +63,30 @@ parking_time_matrix <- function (osmdat) {
     tmat <- dodgr::dodgr_times (net, from = b$node_id, to = b$node_id)
     rownames (tmat) <- colnames (tmat) <- b$osm_id
 
+    file.remove (f)
+
     list (buildings = b, tmat = tmat)
+}
+
+#' Set max speed in dodgr weighting profile to 20km/h, reflective of driving
+#' speeds while searching for car parks.
+#' @noRd
+dodgr_wp_to_20 <- function (max_speed = 20) {
+
+    requireNamespace ("jsonlite", quietly = TRUE)
+
+    f <- tempfile (fileext = ".json")
+    dodgr::write_dodgr_wt_profile (file = f)
+    wt_profiles <- jsonlite::read_json (f, simplify = TRUE)
+    wp <- wt_profiles$weighting_profiles
+
+    index <- which (wp$name == "motorcar" & wp$max_speed > max_speed)
+    wp$max_speed [index]
+    wp$max_speed [index] <- max_speed
+
+    wt_profiles$weighting_profiles <- wp
+
+    jsonlite::write_json (wt_profiles, f)
+
+    return (f)
 }
