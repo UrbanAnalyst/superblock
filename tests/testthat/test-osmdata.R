@@ -18,7 +18,8 @@ test_that ("osm extraction", {
     expect_type (osmdat, "list")
     nms <- c (
         "bbox", "hw_names", "bounding_poly", "highways",
-        "buildings", "open_spaces", "parking", "dat_sc"
+        "buildings", "open_spaces", "parking_areas",
+        "parking_facilities", "dat_sc"
     )
     expect_named (osmdat, nms)
 
@@ -58,5 +59,19 @@ test_that ("osm extraction", {
     expect_true (
         all (c ("osm_id", "name", "geometry") %in%
             names (osmdat$open_spaces))
+    )
+
+    expect_s3_class (osmdat$parking_areas, "sf")
+    expect_equal (nrow (osmdat$parking_areas), 0L) # There are none
+    expect_true (
+        all (c ("osm_id", "name", "geometry") %in%
+            names (osmdat$parking_areas))
+    )
+
+    expect_s3_class (osmdat$parking_facilities, "sf")
+    expect_equal (nrow (osmdat$parking_facilities), 0L) # There are none
+    expect_true (
+        all (c ("osm_id", "geometry") %in%
+            names (osmdat$parking_facilities))
     )
 })

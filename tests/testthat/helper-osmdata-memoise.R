@@ -20,7 +20,11 @@ memoise_osmdata_calls <- function (bbox, hw_names) {
         extract_osm_open_spaces (bbox, bounding_poly)
     })
 
-    parking <- httptest2::with_mock_dir ("osm-parking", {
+    parking_areas <- httptest2::with_mock_dir ("osm-parking-areas", {
         extract_osm_parking_areas (bbox, bounding_poly)
+    })
+
+    parking_facilities <- httptest2::with_mock_dir ("osm-parking-facilities", {
+        extract_osm_parking_facilities (bbox)
     })
 }
