@@ -17,7 +17,7 @@ sb_osmdata_extract <- function (bbox, hw_names, outer = TRUE) {
     cli::cli_alert_success ("Extracted surrounding street network.")
 
     cli::cli_alert_info ("Extracting network within superblock...")
-    highways <- extract_osm_highways (bbox, bounding_poly)
+    dat_hw <- extract_osm_highways (bbox, bounding_poly)
     cli::cli_alert_success ("Extracted network within superblock.")
 
     cli::cli_alert_info ("Extracting building data...")
@@ -36,10 +36,11 @@ sb_osmdata_extract <- function (bbox, hw_names, outer = TRUE) {
         bbox = bbox,
         hw_names = hw_names,
         bounding_poly = bounding_poly,
-        highways = highways,
+        highways = dat_hw$highways,
         buildings = buildings,
         open_spaces = open_spaces,
-        parking = parking
+        parking = parking,
+        dat_sc = dat_hw$dat_sc
     )
 }
 
@@ -51,28 +52,37 @@ extract_bounding_polygon <- function (bbox, hw_names, outer = TRUE) {
 }
 
 m_osmdata_sf <- memoise::memoise (osmdata::osmdata_sf)
+m_osmdata_xml <- memoise::memoise (osmdata::osmdata_xml)
 
 extract_osm_highways <- function (bbox, bounding_poly) {
 
+    args <- list (opq = osmdata::opq (bbox), key = "highway")
+
     is_test_env <- identical (Sys.getenv ("SUPERBLOCK_TESTS", "nope"), "true")
     if (is_test_env) {
-        q <- osmdata::opq (bbox) |>
-            osmdata::add_osm_feature (key = "highway", value = "residential")
-    } else {
-        q <- osmdata::opq (bbox) |>
-            osmdata::add_osm_feature (key = "highway")
+        args <- c (args, value = "residential")
     }
 
-    dat <- m_osmdata_sf (q)
+    bbox_str <- gsub ("\\.", "", paste0 (bbox, collapse = "_"))
+    ftmp <- file.path (tempdir (), paste0 ("osm_", bbox_str, ".osm"))
 
-    index <- sf::st_within (dat$osm_lines$geometry, bounding_poly, sparse = FALSE)
+    q <- do.call (osmdata::add_osm_feature, args)
+    doc <- m_osmdata_xml (q = q, filename = ftmp)
+
+    dat_sf <- m_osmdata_sf (q, doc = doc)
+    dat_sc <- osmdata::osmdata_sc (q, doc = doc)
+
+    # Reduce 'sf' highways to bounding box, but return full 'sc' data
+    index <- sf::st_within (dat_sf$osm_lines$geometry, bounding_poly, sparse = FALSE)
     index <- which (index [, 1])
 
-    hws <- dat$osm_lines [index, ]
+    hws <- dat_sf$osm_lines [index, ]
     nms <- names (hws) [which (!names (hws) == "geometry")]
     has_data <- vapply (nms, function (n) any (!is.na (hws [[n]])), logical (1L))
     has_data <- c (which (has_data), which (nms == "geometry"))
     hws [, has_data]
+
+    return (list (highways = hws, dat_sc = dat_sc))
 }
 
 #' Reduce ways down to main roads only within the bounding polygon, but

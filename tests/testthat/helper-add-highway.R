@@ -26,7 +26,7 @@ helper_extra_highway <- function (osmdat) {
     hw <- sf::st_sf (
         name = "name",
         highway = "residential",
-        lanes = 1,
+        lanes = "1",
         "parking:left:orientation" = "diagonal",
         "parking:right:orientation" = "diagonal",
         geometry = hw

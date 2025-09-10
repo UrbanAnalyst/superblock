@@ -18,7 +18,7 @@ test_that ("osm extraction", {
     expect_type (osmdat, "list")
     nms <- c (
         "bbox", "hw_names", "bounding_poly", "highways",
-        "buildings", "open_spaces", "parking"
+        "buildings", "open_spaces", "parking", "dat_sc"
     )
     expect_named (osmdat, nms)
 
