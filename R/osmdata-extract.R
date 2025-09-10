@@ -54,16 +54,15 @@ m_osmdata_sf <- memoise::memoise (osmdata::osmdata_sf)
 
 extract_osm_highways <- function (bbox, bounding_poly) {
 
+    args <- list (opq = osmdata::opq (bbox), key = "highway")
+
     is_test_env <- identical (Sys.getenv ("SUPERBLOCK_TESTS", "nope"), "true")
     if (is_test_env) {
-        q <- osmdata::opq (bbox) |>
-            osmdata::add_osm_feature (key = "highway", value = "residential")
-    } else {
-        q <- osmdata::opq (bbox) |>
-            osmdata::add_osm_feature (key = "highway")
+        args <- c (args, value = "residential")
     }
 
-    dat <- m_osmdata_sf (q)
+    dat <- do.call (osmdata::add_osm_feature, args) |>
+        m_osmdata_sf ()
 
     index <- sf::st_within (dat$osm_lines$geometry, bounding_poly, sparse = FALSE)
     index <- which (index [, 1])
