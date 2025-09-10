@@ -29,7 +29,8 @@ sb_osmdata_extract <- function (bbox, hw_names, outer = TRUE) {
     cli::cli_alert_success ("Extracted data on open public spaces.")
 
     cli::cli_alert_info ("Extracting data on parking areas...")
-    parking <- extract_osm_parking_areas (bbox, bounding_poly)
+    parking_areas <- extract_osm_parking_areas (bbox, bounding_poly)
+    parking_facilities <- extract_osm_parking_facilities (bbox)
     cli::cli_alert_success ("Extracted data on parking areas.")
 
     list (
@@ -39,7 +40,8 @@ sb_osmdata_extract <- function (bbox, hw_names, outer = TRUE) {
         highways = dat_hw$highways,
         buildings = buildings,
         open_spaces = open_spaces,
-        parking = parking,
+        parking_areas = parking_areas,
+        parking_facilities = parking_facilities,
         dat_sc = dat_hw$dat_sc
     )
 }
@@ -162,4 +164,27 @@ extract_osm_parking_areas <- function (bbox, bounding_poly) {
             grepl ("permissive|yes", parking$access, ignore.case = TRUE)
     )
     parking <- parking [index, ]
+}
+
+#' Large parking facilities should always have an associated node as
+#' "parking_entrance".
+#' @noRd
+extract_osm_parking_facilities <- function (bbox) {
+
+    dat <- osmdata::opq (bbox) |>
+        osmdata::add_osm_feature (
+            key = "amenity", value = "parking_entrance"
+        ) |>
+        m_osmdata_sf ()
+
+    pts <- dat$osm_points
+
+    if ("access" %in% names (pts)) {
+        pts <- dplyr::filter (pts, is.na (access) | access != "private")
+    }
+    if ("barrier" %in% names (pts)) {
+        pts <- dplyr::filter (pts, is.na (barrier) | barrier != "gate")
+    }
+
+    return (pts)
 }
