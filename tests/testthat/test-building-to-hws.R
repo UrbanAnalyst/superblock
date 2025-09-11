@@ -23,7 +23,7 @@ test_that ("hw-to-polygon", {
     expect_named (b, c ("osm_id", "hw_id", "lon", "lat", "n_parking_spaces"))
     expect_true (all (b$osm_id %in% osmdat$buildings$osm_id))
     expect_true (all (b$hw_id %in% osmdat$highways$osm_id))
-    expect_type (b$n_parking_spaces, "integer")
+    expect_type (b$n_parking_spaces, "double")
 
     dat <- parking_time_matrix (osmdat)
 
