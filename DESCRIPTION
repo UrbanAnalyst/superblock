@@ -1,6 +1,6 @@
 Package: superblock
 Title: Analyses of potential superblock
-Version: 0.1.0.045
+Version: 0.1.0.046
 Authors@R: 
     person(given = "Mark",
            family = "Padgham",
@@ -24,6 +24,7 @@ Imports:
     sfheaders,
     units
 Suggests:
+    fs,
     httptest2,
     jsonlite,
     testthat (>= 3.0.0),

@@ -134,6 +134,67 @@ parking_time_matrix <- function (osmdat) {
     list (buildings = b, tmat_car = tmats [[1]], tmat_foot = tmats [[2]])
 }
 
+parking_as_dodgr_net <- function (osmdat) {
+
+    requireNamespace ("fs")
+
+    net <- dodgr::weight_streetnet (
+        osmdat$dat_sc,
+        wt_profile = "motorcar",
+        turn_penalty = TRUE
+    )
+
+    # Reduce highways to those both within and surrounding defined bounding
+    # polygon:
+    ids <- unique (osmdat$highways$osm_id)
+    names <- osmdat$dat_sc$object |>
+        dplyr::filter (key == "name") |>
+        dplyr::select (!key) |>
+        dplyr::rename (name = value)
+    these_names <- c (unique (osmdat$highways$name, osmdat$hw_names))
+    names <- names |>
+        dplyr::filter (name %in% osmdat$highways$name)
+    hws <- reduce_osm_highways (osmdat$highways, osmdat$hw_names)
+    ids <- unique (c (ids, names$object_), hws$osm_id, )
+    net <- dplyr::filter (net, object_ %in% ids)
+
+    names <- osmdat$dat_sc$object |>
+        dplyr::filter (key == "name") |>
+        dplyr::select (!key) |>
+        dplyr::rename (name = value)
+    net <- dplyr::left_join (net, names, by = "object_") |>
+        dplyr::select (.vx0, .vx1, edge_, d, object_, highway, lanes, name)
+
+    # Extract car parking data, and add original OSM id values from full graph:
+    parking <- car_parking_areas (osmdat) |>
+        sf::st_drop_geometry () |>
+        dplyr::select (osm_id, num_parking_spaces)
+    index <- match (parking$osm_id, net$object_)
+    parking$edge_old <- net$edge_ [index]
+
+    netc <- dodgr::dodgr_contract_graph (net)
+
+    # Then read cached edge map and aggregate all parking on to contracted
+    # edges:
+    hashc <- attr (netc, "hashc")
+    tmpfiles <- fs::dir_ls (fs::path_temp (), regexp = paste0 (hashc, "\\.Rds$"))
+    edge_map <- readRDS (grep ("edge", tmpfiles, value = TRUE))
+    parking <- dplyr::left_join (parking, edge_map, by = "edge_old")
+
+    index <- which (is.na (parking$edge_new))
+    parking$edge_new [index] <- parking$edge_old [index]
+    parking <- dplyr::group_by (parking, edge_new) |>
+        dplyr::summarise (num_parking_spaces = sum (num_parking_spaces)) |>
+        dplyr::ungroup () |>
+        dplyr::rename (edge_ = edge_new)
+
+    netc <- dplyr::left_join (netc, parking, by = "edge_")
+    index <- which (is.na (netc$num_parking_spaces))
+    netc$num_parking_spaces [index] <- 0L
+
+    return (netc)
+}
+
 #' Set max speed in dodgr weighting profile to 20km/h, reflective of driving
 #' speeds while searching for car parks.
 #' @noRd
