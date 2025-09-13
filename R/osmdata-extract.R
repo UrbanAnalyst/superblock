@@ -171,6 +171,9 @@ extract_osm_parking_areas <- function (bbox, bounding_poly) {
 #' @noRd
 extract_osm_parking_facilities <- function (bbox) {
 
+    # no visible binding notes:
+    access <- barrier <- NULL
+
     dat <- osmdata::opq (bbox) |>
         osmdata::add_osm_feature (
             key = "amenity", value = "parking_entrance"
