@@ -20,6 +20,9 @@ car_parking_areas <- function (osmdat, add_parking_osm_ids = NULL) {
 
 parking_structure <- function (hws) {
 
+    # suppress no visible binding notes:
+    osm_id <- n <- NULL
+
     # Depth of parking spaces out into the street
     depths <- c (3, 4, 5) # (parallel, diagonal, perpendicular)
     # And equivalent lengths along the street

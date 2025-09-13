@@ -49,6 +49,9 @@ buildings_to_highways <- function (osmdat) {
 
 parking_time_matrix <- function (osmdat) {
 
+    # suppress no visible binding notes:
+    name <- NULL
+
     b <- buildings_to_highways (osmdat)
 
     f <- dodgr_wp_to_20 ()
@@ -135,6 +138,11 @@ parking_time_matrix <- function (osmdat) {
 }
 
 parking_as_dodgr_net <- function (osmdat) {
+
+    # suppress no visible binding notes:
+    key <- value <- name <- object_ <- .vx0 <- .vx1 <-
+        edge_ <- d <- highway <- lanes <- osm_id <-
+        num_parking_spaces <- edge_new <- NULL
 
     requireNamespace ("fs")
 
