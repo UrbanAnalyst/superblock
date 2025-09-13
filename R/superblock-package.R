@@ -1,6 +1,9 @@
 #' @keywords internal
 #' @importFrom memoise memoise
 #' @aliases superblock-package
+#' @importFrom Rcpp evalCpp
+#' @importFrom RcppParallel RcppParallelLibs
+#' @useDynLib superblock, .registration = TRUE
 "_PACKAGE"
 
 # The following block is used by usethis to automatically manage
