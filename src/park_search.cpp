@@ -74,6 +74,58 @@ std::vector <double> parksearch::fill_parking_spaces (std::vector <int> num_spac
     return p_empty;
 }
 
+double parksearch::one_park_search (
+    const parksearch::EdgeMapType &edgeMap,
+    const parksearch::EdgeMapType &edgeMapRev,
+    std::vector <double> &dist,
+    std::vector <double> &p_empty,
+    const size_t nedges,
+    const size_t start_vert
+) {
+
+    std::vector <int> nvisits (nedges, 0L);
+
+    double search_dist = 0;
+    bool found = false;
+    size_t n_iter = 0L;
+
+    size_t i = start_vert - 1L; // Convert 1-based R value to 0-based C++
+
+    while (!found && n_iter < 1000) {
+
+        n_iter++;
+
+        if (p_empty [i] < 1.0e-12) {
+            search_dist += dist [i];
+        } else {
+            // search_dist += d_to_empty [i];
+            search_dist += dist [i];
+            break;
+        }
+
+        nvisits [i]++;
+
+        int next_i = -1;
+        int nextVisits = 99999L;
+        std::unordered_set <size_t> edgeSet = edgeMap.at (i);
+        if (edgeSet.size () == 0) {
+            edgeSet = edgeMapRev.at (i);
+        }
+        for (auto s: edgeSet) {
+            if (nvisits [s] < nextVisits) {
+                nextVisits = nvisits [s];
+                next_i = s;
+            }
+        }
+
+        if (next_i > -1) {
+            i = next_i;
+        }
+    }
+
+    return search_dist;
+}
+
 //' rcpp_park_search
 //'
 //' @noRd
@@ -99,42 +151,8 @@ double rcpp_park_search (const Rcpp::DataFrame graph,
     size_t nedges = static_cast <size_t> (graph.nrow ());
     std::vector <int> nvisits (nedges, 0L);
 
-    double search_dist = 0;
-    bool found = false;
-    size_t n_iter = 0L;
-
-    int i = start_vert - 1L; // Convert 1-based R value to 0-based C++
-
-    while (!found && n_iter < 1000) {
-
-        n_iter++;
-
-        if (p_empty [i] == 0) {
-            search_dist += dist [i];
-        } else {
-            search_dist += d_to_empty [i];
-            break;
-        }
-
-        nvisits [i]++;
-
-        int next_i = -1;
-        int nextVisits = 99999L;
-        std::unordered_set <size_t> edgeSet = edgeMap.at (i);
-        if (edgeSet.size () == 0) {
-            edgeSet = edgeMapRev.at (i);
-        }
-        for (auto s: edgeSet) {
-            if (nvisits [s] < nextVisits) {
-                nextVisits = nvisits [s];
-                next_i = s;
-            }
-        }
-
-        if (next_i > -1) {
-            i = next_i;
-        }
-    }
+    double search_dist = parksearch::one_park_search (
+        edgeMap, edgeMapRev, dist, p_empty, nedges, start_vert);
 
     return search_dist;
 }

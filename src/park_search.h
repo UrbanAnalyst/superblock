@@ -22,6 +22,15 @@ std::vector <size_t> randomOrder (size_t ntotal, size_t n);
 
 std::vector <double> fill_parking_spaces (std::vector <int> num_spaces, double prop_full);
 
+double one_park_search (
+    const parksearch::EdgeMapType &edgeMap,
+    const parksearch::EdgeMapType &edgeMapRev,
+    std::vector <double> &dist,
+    std::vector <double> &p_empty,
+    const size_t nedges,
+    const size_t start_vert
+);
+
 } // end namespace parksearch
 
 double rcpp_park_search (const Rcpp::DataFrame graph,
