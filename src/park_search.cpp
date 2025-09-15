@@ -2,7 +2,6 @@
 #include "park_search.h"
 
 #include "dgraph.h"
-#include "bheap.h"
 
 // # nocov start
 template <typename T>
@@ -21,92 +20,6 @@ void inst_graph (std::shared_ptr<DGraph> g, size_t nedges,
     }
 }
 // # nocov end
-
-// RcppParallel jobs can be chunked to a specified "grain size"; see
-// https://rcppcore.github.io/RcppParallel/#grain_size
-// This function determines chunk size such that there are at least 100 chunks
-// for a given `nfrom`.
-size_t parksearch::get_chunk_size (const size_t nfrom)
-{
-    size_t chunk_size;
-
-    if (nfrom > 1000)
-        chunk_size = 100;
-    else if (nfrom > 100)
-        chunk_size = 10;
-    else
-        chunk_size = 1;
-
-    return chunk_size;
-}
-
-
-std::shared_ptr <HeapDesc> parksearch::getHeapImpl(const std::string& heap_type)
-{
-    return std::make_shared <HeapD<BHeap> >();
-}
-
-
-struct OneDist : public RcppParallel::Worker
-{
-    RcppParallel::RVector <int> dp_fromi;
-    const std::vector <size_t> toi;
-    const size_t nverts;
-    const std::vector <double> vx;
-    const std::vector <double> vy;
-    const std::shared_ptr <DGraph> g;
-    const std::string heap_type;
-    bool is_spatial;
-
-    RcppParallel::RMatrix <double> dout;
-
-    // constructor
-    OneDist (
-            const RcppParallel::RVector <int> fromi,
-            const std::vector <size_t> toi_in,
-            const size_t nverts_in,
-            const std::vector <double> vx_in,
-            const std::vector <double> vy_in,
-            const std::shared_ptr <DGraph> g_in,
-            const std::string & heap_type_in,
-            const bool & is_spatial_in,
-            RcppParallel::RMatrix <double> dout_in) :
-        dp_fromi (fromi), toi (toi_in), nverts (nverts_in),
-        vx (vx_in), vy (vy_in),
-        g (g_in), heap_type (heap_type_in), is_spatial (is_spatial_in),
-        dout (dout_in)
-    {
-    }
-
-    // Parallel function operator
-    void operator() (std::size_t begin, std::size_t end)
-    {
-        for (std::size_t i = begin; i < end; i++)
-        {
-            std::shared_ptr<PF::PathFinder> pathfinder =
-                std::make_shared <PF::PathFinder> (nverts,
-                        *parksearch::getHeapImpl (heap_type), g);
-            std::vector <double> w (nverts);
-            std::vector <double> d (nverts);
-            std::vector <long int> prev (nverts);
-
-            std::vector <double> heuristic (nverts, 0.0);
-
-            size_t from_i = static_cast <size_t> (dp_fromi [i]);
-
-            pathfinder->Dijkstra (d, w, prev, from_i, toi);
-
-            for (size_t j = 0; j < toi.size (); j++)
-            {
-                if (w [toi [j]] < INFINITE_DOUBLE)
-                {
-                    dout (i, j) = d [toi [j]];
-                }
-            }
-        }
-    }
-                                   
-};
 
 size_t parksearch::make_vert_map (const Rcpp::DataFrame &vert_map_in,
         const std::vector <std::string> &vert_map_id,
@@ -151,7 +64,7 @@ void parksearch::make_vert_to_edge_maps (const std::vector <std::string> &from,
 //'
 //' @noRd
 // [[Rcpp::export]]
-Rcpp::NumericMatrix rcpp_get_sp_dists (const Rcpp::DataFrame graph,
+Rcpp::NumericMatrix rcpp_park_search (const Rcpp::DataFrame graph,
         const Rcpp::DataFrame vert_map_in,
         Rcpp::IntegerVector fromi,
         Rcpp::IntegerVector toi_in,
@@ -190,27 +103,7 @@ Rcpp::NumericMatrix rcpp_get_sp_dists (const Rcpp::DataFrame graph,
 
     for (size_t i = 0; i < nfrom; i++)
     {
-        // These lines (re-)initialise the heap, so have to be called for each v
-        std::shared_ptr <PF::PathFinder> pathfinder =
-            std::make_shared <PF::PathFinder> (
-                nverts, *parksearch::getHeapImpl(heap_type), g);
-
-        pathfinder->init (g); // specify the graph
-
         Rcpp::checkUserInterrupt ();
-        std::fill (w.begin(), w.end(), INFINITE_DOUBLE);
-        std::fill (d.begin(), d.end(), INFINITE_DOUBLE);
-        size_t fromi_i = static_cast <size_t> (fromi [static_cast <R_xlen_t> (i)]);
-        d [fromi_i] = w [fromi_i] = 0.0;
-
-        pathfinder->Dijkstra (d, w, prev, fromi_i, toi);
-        for (size_t j = 0; j < nto; j++)
-        {
-            if (w [static_cast <size_t> (toi [j])] < INFINITE_DOUBLE)
-            {
-                dout (i, j) = d [static_cast <size_t> (toi [j])];
-            }
-        }
     }
     return (dout);
 }

@@ -12,14 +12,11 @@
 #include <RcppThread.h>
 #include <RcppParallel.h>
 
-#include "pathfinders.h"
+#include "dgraph.h"
 
 class DGraph;
-class PathFinder;
 
 namespace parksearch {
-
-std::shared_ptr <HeapDesc> getHeapImpl(const std::string& heap_type);
 
 size_t make_vert_map (const Rcpp::DataFrame &vert_map_in,
         const std::vector <std::string> &vert_map_id,
@@ -34,8 +31,7 @@ void make_vert_to_edge_maps (const std::vector <std::string> &from,
 size_t get_chunk_size (const size_t nfrom);
 } // end namespace parksearch
 
-Rcpp::NumericMatrix rcpp_get_sp_dists (const Rcpp::DataFrame graph,
+Rcpp::NumericMatrix rcpp_park_search (const Rcpp::DataFrame graph,
         const Rcpp::DataFrame vert_map_in,
         Rcpp::IntegerVector fromi,
-        Rcpp::IntegerVector toi_in,
-        const std::string& heap_type);
+        Rcpp::IntegerVector toi_in);

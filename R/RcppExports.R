@@ -4,6 +4,6 @@
 #' rcpp_get_sp_dists
 #'
 #' @noRd
-rcpp_get_sp_dists <- function (graph, vert_map_in, fromi, toi_in, heap_type) {
-    .Call ("_superblock_rcpp_get_sp_dists", PACKAGE = "superblock", graph, vert_map_in, fromi, toi_in, heap_type)
+rcpp_park_search <- function (graph, vert_map_in, fromi, toi_in, heap_type) {
+    .Call ("_superblock_rcpp_park_search", PACKAGE = "superblock", graph, vert_map_in, fromi, toi_in, heap_type)
 }
