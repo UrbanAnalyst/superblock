@@ -143,20 +143,23 @@ double rcpp_park_search (const Rcpp::DataFrame graph,
     parksearch::EdgeMapType edgeMap, edgeMapRev;
     parksearch::makeEdgeMaps (edge_map_in, edge_map_rev_in, edgeMap, edgeMapRev);
 
-    std::vector <int> num_spaces = graph ["np"];
-    std::vector <double> p_empty = parksearch::fillParkingSpaces (num_spaces, prop_full);
-
     std::vector <double> dist = graph ["d"];
-    std::vector <double> d_to_empty = graph ["d_to_empty"];
+    std::vector <int> num_spaces = graph ["np"];
 
     size_t nedges = static_cast <size_t> (graph.nrow ());
+    std::vector <double> p_empty = parksearch::fillParkingSpaces (num_spaces, prop_full);
+    std::vector <double> d_to_empty(nedges, 0.0);
+    for (int i = 0; i < nedges; i++) {
+        if (num_spaces [i] > 0) {
+            double dprop = utils::expected_min_d (num_spaces [i], floor(num_spaces[i] * prop_full));
+            d_to_empty[i] = dist[i] * dprop / num_spaces[i];
+        }
+    }
+
     std::vector <int> nvisits (nedges, 0L);
 
     double search_dist = parksearch::oneParkSearch (
         edgeMap, edgeMapRev, dist, p_empty, nedges, start_vert);
-
-    double junk = utils::expected_min_d (100L, 75L);
-    Rcpp::Rcout << junk << std::endl;
 
     return search_dist;
 }

@@ -219,28 +219,7 @@ fill_parking_spaces <- function (net, prop_full = 0.8) {
     index <- which (net$np > 0)
     net$p_empty [index] <- net$n_empty [index] / net$np [index]
 
-    index <- which (net$np > 0)
-    net$d_to_empty <- 0
-    dprop <- apply (cbind (net$np, net$n_empty) [index, ], 1, function (i) {
-        expected_min_d (i [1], i [1] - i [2])
-    })
-    net$d_to_empty [index] <- net$d [index] * dprop / net$np [index]
-    net$d_to_empty [which (net$n_empty == 0L)] <- net$d [which (net$n_empty == 0L)]
-
     return (net)
-}
-
-#' Map unique vertex names to sequential numbers in matrix
-#'
-#' Adapted from same fn in dodgr/R/dists.R
-#' @noRd
-make_vert_map <- function (graph) {
-
-    verts <- unique (c (graph$.vx0, graph$.vx1))
-    data.frame (
-        vert = verts,
-        id = seq_along (verts) - 1L
-    )
 }
 
 make_edge_to_edge_map <- function (graph, rev = FALSE) {
@@ -251,41 +230,4 @@ make_edge_to_edge_map <- function (graph, rev = FALSE) {
         ret <- lapply (net$.vx0, function (i) which (net$.vx1 == i) - 1L)
     }
     return (ret)
-}
-
-#' Sample `n` values from a series, `d`, and return the expected minimum of the
-#' unsampled values.
-#'
-#' If `d` represent all possible distances to car parking spaces, this expected
-#' minimum is the expected distance to travel given that `n` spaces are
-#' occupied.
-#' @noRd
-expected_min_d <- function (d, n = 2) {
-
-    comb_total <- choose (d, n)
-    val <- 0.0
-
-    for (i in seq (1, d)) {
-
-        n_to_i <- sum (1:i)
-        n_lt_i <- ifelse (i > 1, sum (1:(i - 1)), 0)
-
-        if (n_lt_i > n) {
-            prob_all_n_lt_sampled <- 0
-        } else {
-            prob_all_n_lt_sampled <- choose (d - n_lt_i, n - n_lt_i) / comb_total
-        }
-
-        if (n_to_i > n) {
-            prob_all_n_sampled <- 0
-        } else {
-            prob_all_n_sampled <- choose (d - n_to_i, n - n_to_i) / comb_total
-        }
-
-        p <- prob_all_n_lt_sampled - prob_all_n_sampled
-
-        val <- val + i * p
-    }
-
-    return (val)
 }
