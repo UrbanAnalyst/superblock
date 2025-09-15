@@ -1,3 +1,4 @@
+#include "utils.h"
 #include "park_search.h"
 
 void parksearch::makeEdgeMaps (
@@ -153,6 +154,9 @@ double rcpp_park_search (const Rcpp::DataFrame graph,
 
     double search_dist = parksearch::oneParkSearch (
         edgeMap, edgeMapRev, dist, p_empty, nedges, start_vert);
+
+    double junk = utils::expected_min_d (100L, 75L);
+    Rcpp::Rcout << junk << std::endl;
 
     return search_dist;
 }
