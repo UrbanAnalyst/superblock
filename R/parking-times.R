@@ -243,6 +243,16 @@ make_vert_map <- function (graph) {
     )
 }
 
+make_edge_to_edge_map <- function (graph, rev = FALSE) {
+
+    if (!rev) {
+        ret <- lapply (net$.vx1, function (i) which (net$.vx0 == i) - 1L)
+    } else {
+        ret <- lapply (net$.vx0, function (i) which (net$.vx1 == i) - 1L)
+    }
+    return (ret)
+}
+
 #' Sample `n` values from a series, `d`, and return the expected minimum of the
 #' unsampled values.
 #'

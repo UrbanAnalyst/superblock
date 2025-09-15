@@ -4,6 +4,6 @@
 #' rcpp_park_search
 #'
 #' @noRd
-rcpp_park_search <- function (graph, vert_map_in, start_vert) {
-    .Call (`_superblock_rcpp_park_search`, graph, vert_map_in, start_vert)
+rcpp_park_search <- function (graph, edge_map_in, edge_map_rev_in, start_vert) {
+    .Call (`_superblock_rcpp_park_search`, graph, edge_map_in, edge_map_rev_in, start_vert)
 }
