@@ -1,7 +1,5 @@
-
-#include "park_search.h"
-
 #include "dgraph.h"
+#include "park_search.h"
 
 // # nocov start
 template <typename T>
@@ -9,14 +7,13 @@ void inst_graph (std::shared_ptr<DGraph> g, size_t nedges,
         const std::map <std::string, size_t>& vert_map,
         const std::vector <std::string>& from,
         const std::vector <std::string>& to,
-        const std::vector <T>& dist,
-        const std::vector <T>& wt)
+        const std::vector <T>& dist)
 {
     for (size_t i = 0; i < nedges; ++i)
     {
         size_t fromi = vert_map.at(from [i]);
         size_t toi = vert_map.at(to [i]);
-        g->addNewEdge (fromi, toi, dist [i], wt [i], i);
+        g->addNewEdge (fromi, toi, dist [i], i);
     }
 }
 // # nocov end
@@ -35,13 +32,17 @@ size_t parksearch::make_vert_map (const Rcpp::DataFrame &vert_map_in,
     return (nverts);
 }
 
+//' rcpp_park_search
+//'
+//' @noRd
+// [[Rcpp::export]]
 Rcpp::NumericMatrix rcpp_park_search (const Rcpp::DataFrame graph,
         const Rcpp::DataFrame vert_map_in)
 {
-    std::vector <std::string> from = graph ["from"];
-    std::vector <std::string> to = graph ["to"];
+    std::vector <std::string> from = graph [".vx0"];
+    std::vector <std::string> to = graph [".vx1"];
     std::vector <double> dist = graph ["d"];
-    std::vector <double> wt = graph ["d_weighted"];
+    std::vector <double> wt = dist;
 
     size_t nedges = static_cast <size_t> (graph.nrow ());
     std::map <std::string, size_t> vert_map;
@@ -53,11 +54,9 @@ Rcpp::NumericMatrix rcpp_park_search (const Rcpp::DataFrame graph,
             vert_map_n, vert_map);
 
     std::shared_ptr<DGraph> g = std::make_shared<DGraph>(nverts);
-    inst_graph (g, nedges, vert_map, from, to, dist, wt);
+    inst_graph (g, nedges, vert_map, from, to, dist);
 
-    std::vector<double> w (nverts);
     std::vector<double> d (nverts);
-    std::vector<long int> prev (nverts);
 
     // initialise dout matrix to NA
     Rcpp::NumericVector na_vec = Rcpp::NumericVector (nfrom * nto,
@@ -65,18 +64,9 @@ Rcpp::NumericMatrix rcpp_park_search (const Rcpp::DataFrame graph,
     Rcpp::NumericMatrix dout (static_cast <int> (nfrom),
             static_cast <int> (nto), na_vec.begin ());
 
-
     for (size_t i = 0; i < nfrom; i++)
     {
         Rcpp::checkUserInterrupt ();
     }
     return (dout);
-}
-
-//' rcpp_test
-//'
-//' @noRd
-// [[Rcpp::export]]
-int rcpp_test () {
-    return 1L;
 }

@@ -22,5 +22,3 @@ size_t make_vert_map (const Rcpp::DataFrame &vert_map_in,
 
 Rcpp::NumericMatrix rcpp_park_search (const Rcpp::DataFrame graph,
         const Rcpp::DataFrame vert_map_in);
-
-int rcpp_test ();

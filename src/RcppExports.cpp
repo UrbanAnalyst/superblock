@@ -10,19 +10,21 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
-// rcpp_test
-int rcpp_test();
-RcppExport SEXP _superblock_rcpp_test() {
+// rcpp_park_search
+Rcpp::NumericMatrix rcpp_park_search(const Rcpp::DataFrame graph, const Rcpp::DataFrame vert_map_in);
+RcppExport SEXP _superblock_rcpp_park_search(SEXP graphSEXP, SEXP vert_map_inSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    rcpp_result_gen = Rcpp::wrap(rcpp_test());
+    Rcpp::traits::input_parameter< const Rcpp::DataFrame >::type graph(graphSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::DataFrame >::type vert_map_in(vert_map_inSEXP);
+    rcpp_result_gen = Rcpp::wrap(rcpp_park_search(graph, vert_map_in));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_superblock_rcpp_test", (DL_FUNC) &_superblock_rcpp_test, 0},
+    {"_superblock_rcpp_park_search", (DL_FUNC) &_superblock_rcpp_park_search, 2},
     {NULL, NULL, 0}
 };
 
