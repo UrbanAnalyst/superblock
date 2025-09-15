@@ -35,46 +35,9 @@ size_t parksearch::make_vert_map (const Rcpp::DataFrame &vert_map_in,
     return (nverts);
 }
 
-// Flows from the pathfinder output are reallocated based on matching vertex
-// pairs to edge indices. Note, however, that contracted graphs frequently
-// have duplicate vertex pairs with different distances. The following
-// therefore uses two maps, one to hold the ultimate index from vertex
-// pairs, and the other to hold minimal distances. This is used in flow routines
-// only.
-void parksearch::make_vert_to_edge_maps (const std::vector <std::string> &from,
-        const std::vector <std::string> &to, const std::vector <double> &wt,
-        std::unordered_map <std::string, size_t> &verts_to_edge_map,
-        std::unordered_map <std::string, double> &verts_to_dist_map)
-{
-    for (size_t i = 0; i < from.size (); i++)
-    {
-        std::string two_verts = "f" + from [i] + "t" + to [i];
-        verts_to_edge_map.emplace (two_verts, i);
-        if (verts_to_dist_map.find (two_verts) == verts_to_dist_map.end ())
-            verts_to_dist_map.emplace (two_verts, wt [i]);
-        else if (wt [i] < verts_to_dist_map.at (two_verts))
-        {
-            verts_to_dist_map [two_verts] = wt [i];
-            verts_to_edge_map [two_verts] = i;
-        }
-    }
-}
-
-//' rcpp_get_sp_dists
-//'
-//' @noRd
-// [[Rcpp::export]]
 Rcpp::NumericMatrix rcpp_park_search (const Rcpp::DataFrame graph,
-        const Rcpp::DataFrame vert_map_in,
-        Rcpp::IntegerVector fromi,
-        Rcpp::IntegerVector toi_in,
-        const std::string& heap_type)
+        const Rcpp::DataFrame vert_map_in)
 {
-    std::vector <size_t> toi =
-        Rcpp::as <std::vector <size_t> > ( toi_in);
-    size_t nfrom = static_cast <size_t> (fromi.size ());
-    size_t nto = static_cast <size_t> (toi.size ());
-
     std::vector <std::string> from = graph ["from"];
     std::vector <std::string> to = graph ["to"];
     std::vector <double> dist = graph ["d"];
@@ -82,6 +45,8 @@ Rcpp::NumericMatrix rcpp_park_search (const Rcpp::DataFrame graph,
 
     size_t nedges = static_cast <size_t> (graph.nrow ());
     std::map <std::string, size_t> vert_map;
+    const size_t nfrom = static_cast <size_t> (vert_map_in.nrow());
+    const size_t nto = nfrom;
     std::vector <std::string> vert_map_id = vert_map_in ["vert"];
     std::vector <size_t> vert_map_n = vert_map_in ["id"];
     size_t nverts = parksearch::make_vert_map (vert_map_in, vert_map_id,
@@ -106,4 +71,12 @@ Rcpp::NumericMatrix rcpp_park_search (const Rcpp::DataFrame graph,
         Rcpp::checkUserInterrupt ();
     }
     return (dout);
+}
+
+//' rcpp_test
+//'
+//' @noRd
+// [[Rcpp::export]]
+int rcpp_test () {
+    return 1L;
 }

@@ -7,7 +7,7 @@
   "codeRepository": "https://github.com/UrbanAnalyst/superblock-ms",
   "issueTracker": "https://github.com/UrbanAnalyst/superblock-ms/issues",
   "license": "https://spdx.org/licenses/GPL-3.0",
-  "version": "0.1.0.050",
+  "version": "0.1.0.51",
   "programmingLanguage": {
     "@type": "ComputerLanguage",
     "name": "R",
@@ -188,6 +188,7 @@
       "@type": "SoftwareApplication",
       "identifier": "Rcpp",
       "name": "Rcpp",
+      "version": ">= 1.0.14",
       "provider": {
         "@id": "https://cran.r-project.org",
         "@type": "Organization",
@@ -197,18 +198,6 @@
       "sameAs": "https://CRAN.R-project.org/package=Rcpp"
     },
     "10": {
-      "@type": "SoftwareApplication",
-      "identifier": "RcppParallel",
-      "name": "RcppParallel",
-      "provider": {
-        "@id": "https://cran.r-project.org",
-        "@type": "Organization",
-        "name": "Comprehensive R Archive Network (CRAN)",
-        "url": "https://cran.r-project.org"
-      },
-      "sameAs": "https://CRAN.R-project.org/package=RcppParallel"
-    },
-    "11": {
       "@type": "SoftwareApplication",
       "identifier": "sf",
       "name": "sf",
@@ -220,7 +209,7 @@
       },
       "sameAs": "https://CRAN.R-project.org/package=sf"
     },
-    "12": {
+    "11": {
       "@type": "SoftwareApplication",
       "identifier": "sfheaders",
       "name": "sfheaders",
@@ -232,7 +221,7 @@
       },
       "sameAs": "https://CRAN.R-project.org/package=sfheaders"
     },
-    "13": {
+    "12": {
       "@type": "SoftwareApplication",
       "identifier": "units",
       "name": "units",
@@ -244,11 +233,8 @@
       },
       "sameAs": "https://CRAN.R-project.org/package=units"
     },
-    "SystemRequirements": "GNU make"
+    "SystemRequirements": null
   },
-  "fileSize": "4259.376KB",
-  "contIntegration": [
-    "https://github.com/UrbanAnalyst/superblock/actions/workflows/R-CMD-check.yaml",
-    "https://app.codecov.io/gh/UrbanAnalyst/superblock"
-  ]
+  "fileSize": "3458.704KB",
+  "contIntegration": ["https://github.com/UrbanAnalyst/superblock/actions/workflows/R-CMD-check.yaml", "https://app.codecov.io/gh/UrbanAnalyst/superblock"]
 }

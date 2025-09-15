@@ -54,8 +54,6 @@ parking_time_matrix <- function (osmdat) {
 
     b <- buildings_to_highways (osmdat)
 
-    f <- dodgr_wp_to_20 ()
-
     # Travel times between all pairs of buildings, so between all buildings and
     # parking spaces.
     tmats <- lapply (c ("motorcar", "foot"), function (wp) {
@@ -63,7 +61,6 @@ parking_time_matrix <- function (osmdat) {
         net <- dodgr::weight_streetnet (
             osmdat$dat_sc,
             wt_profile = wp,
-            wt_profile_file = f,
             turn_penalty = TRUE
         )
 
@@ -203,27 +200,17 @@ parking_as_dodgr_net <- function (osmdat) {
     return (netc)
 }
 
-#' Set max speed in dodgr weighting profile to 20km/h, reflective of driving
-#' speeds while searching for car parks.
+#' Map unique vertex names to sequential numbers in matrix
+#'
+#' Adapted from same fn in dodgr/R/dists.R
 #' @noRd
-dodgr_wp_to_20 <- function (max_speed = 20) {
+make_vert_map <- function (graph) {
 
-    requireNamespace ("jsonlite", quietly = TRUE)
-
-    f <- tempfile (fileext = ".json")
-    dodgr::write_dodgr_wt_profile (file = f)
-    wt_profiles <- jsonlite::read_json (f, simplify = TRUE)
-    wp <- wt_profiles$weighting_profiles
-
-    index <- which (wp$name == "motorcar" & wp$max_speed > max_speed)
-    wp$max_speed [index]
-    wp$max_speed [index] <- max_speed
-
-    wt_profiles$weighting_profiles <- wp
-
-    jsonlite::write_json (wt_profiles, f)
-
-    return (f)
+    verts <- unique (c (graph$.vx0, graph$.vx1))
+    data.frame (
+        vert = verts,
+        id = seq_along (verts) - 1L
+    )
 }
 
 #' Sample `n` values from a series, `d`, and return the expected minimum of the

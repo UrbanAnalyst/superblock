@@ -1,8 +1,9 @@
+#' superblock package.
+#'
+#' @docType package
 #' @keywords internal
 #' @importFrom memoise memoise
-#' @aliases superblock-package
 #' @importFrom Rcpp evalCpp
-#' @importFrom RcppParallel RcppParallelLibs
 #' @useDynLib superblock, .registration = TRUE
 "_PACKAGE"
 

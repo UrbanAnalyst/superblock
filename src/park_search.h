@@ -7,10 +7,6 @@
 #include <fstream>
 
 #include <Rcpp.h>
-// [[Rcpp::plugins(cpp11)]]
-// [[Rcpp::depends(RcppParallel,RcppThread)]]
-#include <RcppThread.h>
-#include <RcppParallel.h>
 
 #include "dgraph.h"
 
@@ -22,16 +18,9 @@ size_t make_vert_map (const Rcpp::DataFrame &vert_map_in,
         const std::vector <std::string> &vert_map_id,
         const std::vector <size_t> &vert_map_n,
         std::map <std::string, size_t> &vert_map);
-
-void make_vert_to_edge_maps (const std::vector <std::string> &from,
-        const std::vector <std::string> &to, const std::vector <double> &wt,
-        std::unordered_map <std::string, size_t> &verts_to_edge_map,
-        std::unordered_map <std::string, double> &verts_to_dist_map);
-
-size_t get_chunk_size (const size_t nfrom);
 } // end namespace parksearch
 
 Rcpp::NumericMatrix rcpp_park_search (const Rcpp::DataFrame graph,
-        const Rcpp::DataFrame vert_map_in,
-        Rcpp::IntegerVector fromi,
-        Rcpp::IntegerVector toi_in);
+        const Rcpp::DataFrame vert_map_in);
+
+int rcpp_test ();
