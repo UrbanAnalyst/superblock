@@ -20,9 +20,9 @@ void makeEdgeMaps (
 
 std::vector <size_t> randomOrder (size_t ntotal, size_t n);
 
-std::vector <double> fill_parking_spaces (std::vector <int> num_spaces, double prop_full);
+std::vector <double> fillParkingSpaces (std::vector <int> num_spaces, double prop_full);
 
-double one_park_search (
+double oneParkSearch (
     const parksearch::EdgeMapType &edgeMap,
     const parksearch::EdgeMapType &edgeMapRev,
     std::vector <double> &dist,
