@@ -1,5 +1,5 @@
 
-#include "run_sp.h"
+#include "park_search.h"
 
 #include "dgraph.h"
 #include "bheap.h"
@@ -26,7 +26,7 @@ void inst_graph (std::shared_ptr<DGraph> g, size_t nedges,
 // https://rcppcore.github.io/RcppParallel/#grain_size
 // This function determines chunk size such that there are at least 100 chunks
 // for a given `nfrom`.
-size_t run_sp::get_chunk_size (const size_t nfrom)
+size_t parksearch::get_chunk_size (const size_t nfrom)
 {
     size_t chunk_size;
 
@@ -41,7 +41,7 @@ size_t run_sp::get_chunk_size (const size_t nfrom)
 }
 
 
-std::shared_ptr <HeapDesc> run_sp::getHeapImpl(const std::string& heap_type)
+std::shared_ptr <HeapDesc> parksearch::getHeapImpl(const std::string& heap_type)
 {
     return std::make_shared <HeapD<BHeap> >();
 }
@@ -85,7 +85,7 @@ struct OneDist : public RcppParallel::Worker
         {
             std::shared_ptr<PF::PathFinder> pathfinder =
                 std::make_shared <PF::PathFinder> (nverts,
-                        *run_sp::getHeapImpl (heap_type), g);
+                        *parksearch::getHeapImpl (heap_type), g);
             std::vector <double> w (nverts);
             std::vector <double> d (nverts);
             std::vector <long int> prev (nverts);
@@ -108,7 +108,7 @@ struct OneDist : public RcppParallel::Worker
                                    
 };
 
-size_t run_sp::make_vert_map (const Rcpp::DataFrame &vert_map_in,
+size_t parksearch::make_vert_map (const Rcpp::DataFrame &vert_map_in,
         const std::vector <std::string> &vert_map_id,
         const std::vector <size_t> &vert_map_n,
         std::map <std::string, size_t> &vert_map)
@@ -128,7 +128,7 @@ size_t run_sp::make_vert_map (const Rcpp::DataFrame &vert_map_in,
 // therefore uses two maps, one to hold the ultimate index from vertex
 // pairs, and the other to hold minimal distances. This is used in flow routines
 // only.
-void run_sp::make_vert_to_edge_maps (const std::vector <std::string> &from,
+void parksearch::make_vert_to_edge_maps (const std::vector <std::string> &from,
         const std::vector <std::string> &to, const std::vector <double> &wt,
         std::unordered_map <std::string, size_t> &verts_to_edge_map,
         std::unordered_map <std::string, double> &verts_to_dist_map)
@@ -145,61 +145,6 @@ void run_sp::make_vert_to_edge_maps (const std::vector <std::string> &from,
             verts_to_edge_map [two_verts] = i;
         }
     }
-}
-
-//' rcpp_get_sp_dists_par
-//'
-//' @noRd
-// [[Rcpp::export]]
-Rcpp::NumericMatrix rcpp_get_sp_dists_par (const Rcpp::DataFrame graph,
-        const Rcpp::DataFrame vert_map_in,
-        Rcpp::IntegerVector fromi,
-        Rcpp::IntegerVector toi_in,
-        const std::string& heap_type,
-        const bool is_spatial)
-{
-    std::vector <size_t> toi =
-        Rcpp::as <std::vector <size_t> > ( toi_in);
-
-    size_t nfrom = static_cast <size_t> (fromi.size ());
-    size_t nto = static_cast <size_t> (toi.size ());
-
-    const std::vector <std::string> from = graph ["from"];
-    const std::vector <std::string> to = graph ["to"];
-    const std::vector <double> dist = graph ["d"];
-    const std::vector <double> wt = graph ["d_weighted"];
-
-    const size_t nedges = static_cast <size_t> (graph.nrow ());
-    std::map <std::string, size_t> vert_map;
-    std::vector <std::string> vert_map_id = vert_map_in ["vert"];
-    std::vector <size_t> vert_map_n = vert_map_in ["id"];
-    const size_t nverts = run_sp::make_vert_map (vert_map_in, vert_map_id,
-            vert_map_n, vert_map);
-
-    std::vector <double> vx (nverts), vy (nverts);
-    if (is_spatial)
-    {
-        vx = Rcpp::as <std::vector <double> > (vert_map_in ["x"]);
-        vy = Rcpp::as <std::vector <double> > (vert_map_in ["y"]);
-    }
-
-    std::shared_ptr <DGraph> g = std::make_shared <DGraph> (nverts);
-    inst_graph (g, nedges, vert_map, from, to, dist, wt);
-
-    Rcpp::NumericVector na_vec = Rcpp::NumericVector (nfrom * nto,
-            Rcpp::NumericVector::get_na ());
-    Rcpp::NumericMatrix dout (static_cast <int> (nfrom),
-            static_cast <int> (nto), na_vec.begin ());
-
-    // Create parallel worker
-    OneDist one_dist (RcppParallel::RVector <int> (fromi), toi,
-            nverts, vx, vy, g, heap_type, is_spatial,
-            RcppParallel::RMatrix <double> (dout));
-
-    size_t chunk_size = run_sp::get_chunk_size (nfrom);
-    RcppParallel::parallelFor (0, nfrom, one_dist, chunk_size);
-    
-    return (dout);
 }
 
 //' rcpp_get_sp_dists
@@ -226,7 +171,7 @@ Rcpp::NumericMatrix rcpp_get_sp_dists (const Rcpp::DataFrame graph,
     std::map <std::string, size_t> vert_map;
     std::vector <std::string> vert_map_id = vert_map_in ["vert"];
     std::vector <size_t> vert_map_n = vert_map_in ["id"];
-    size_t nverts = run_sp::make_vert_map (vert_map_in, vert_map_id,
+    size_t nverts = parksearch::make_vert_map (vert_map_in, vert_map_id,
             vert_map_n, vert_map);
 
     std::shared_ptr<DGraph> g = std::make_shared<DGraph>(nverts);
@@ -248,7 +193,7 @@ Rcpp::NumericMatrix rcpp_get_sp_dists (const Rcpp::DataFrame graph,
         // These lines (re-)initialise the heap, so have to be called for each v
         std::shared_ptr <PF::PathFinder> pathfinder =
             std::make_shared <PF::PathFinder> (
-                nverts, *run_sp::getHeapImpl(heap_type), g);
+                nverts, *parksearch::getHeapImpl(heap_type), g);
 
         pathfinder->init (g); // specify the graph
 

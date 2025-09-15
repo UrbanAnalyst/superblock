@@ -4,7 +4,7 @@ PKG_LIBS += $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS)
 PKG_LIBS += $(shell "${R_HOME}/bin${R_ARCH_BIN}/Rscript.exe" \
               -e "RcppParallel::RcppParallelLibs()")
 
-OBJECTS = bheap.o dgraph.o pathfinders.o run_sp.o
+OBJECTS = bheap.o dgraph.o pathfinders.o park_search.o
 
 .PHONY: all clean
 

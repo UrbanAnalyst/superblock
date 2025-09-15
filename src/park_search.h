@@ -17,11 +17,7 @@
 class DGraph;
 class PathFinder;
 
-//----------------------------
-//----- functions in run_sp.cpp
-//----------------------------
-
-namespace run_sp {
+namespace parksearch {
 
 std::shared_ptr <HeapDesc> getHeapImpl(const std::string& heap_type);
 
@@ -36,17 +32,10 @@ void make_vert_to_edge_maps (const std::vector <std::string> &from,
         std::unordered_map <std::string, double> &verts_to_dist_map);
 
 size_t get_chunk_size (const size_t nfrom);
-} // end namespace run_sp
+} // end namespace parksearch
 
 Rcpp::NumericMatrix rcpp_get_sp_dists (const Rcpp::DataFrame graph,
         const Rcpp::DataFrame vert_map_in,
         Rcpp::IntegerVector fromi,
         Rcpp::IntegerVector toi_in,
         const std::string& heap_type);
-
-Rcpp::NumericMatrix rcpp_get_sp_dists_par (const Rcpp::DataFrame graph,
-        const Rcpp::DataFrame vert_map_in,
-        Rcpp::IntegerVector fromi,
-        Rcpp::IntegerVector toi_in,
-        const std::string& heap_type,
-        const bool is_spatial);
