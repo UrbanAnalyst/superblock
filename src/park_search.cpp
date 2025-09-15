@@ -1,16 +1,10 @@
 #include "park_search.h"
 
-//' rcpp_park_search
-//'
-//' @noRd
-// [[Rcpp::export]]
-double rcpp_park_search (const Rcpp::DataFrame graph,
-        const Rcpp::List edge_map_in,
-        const Rcpp::List edge_map_rev_in,
-        const int start_vert)
-{
-
-    std::unordered_map <size_t, std::unordered_set <size_t> > edgeMap, edgeMapRev;
+void parksearch::makeEdgeMaps (
+    const Rcpp::List edge_map_in,
+    const Rcpp::List edge_map_rev_in,
+    EdgeMapType &edgeMap,
+    EdgeMapType &edgeMapRev) {
 
     for (int i = 0; i < edge_map_in.size (); i++) {
         std::vector <size_t> edge_vec = Rcpp::as <std::vector <size_t>> (edge_map_in [i]);
@@ -29,9 +23,77 @@ double rcpp_park_search (const Rcpp::DataFrame graph,
         }
         edgeMapRev.emplace (i, edgeSet);
     }
+}
+
+std::vector <size_t> parksearch::randomOrder (size_t ntotal, size_t n) {
+
+    std::vector <double> xrand = Rcpp::as<std::vector<double>> (Rcpp::runif (ntotal));
+
+    std::vector <size_t> indices(ntotal);
+    std::iota(indices.begin(), indices.end(), 0);
+    std::sort(indices.begin(), indices.end(),
+              [&xrand](size_t i, size_t j) { return xrand[i] < xrand[j]; });
+
+    std::vector <size_t> res (indices.begin(), indices.begin() + n);
+
+    return res;
+}
+
+std::vector <double> parksearch::fill_parking_spaces (std::vector <int> num_spaces, double prop_full) {
+
+    const size_t n = num_spaces.size();
+    std::vector <double> p_empty (n, 0.0);
+
+    size_t ntotal = 0;
+    for (auto i: num_spaces) {
+        ntotal += i;
+    }
+    std::vector <size_t> allSpaces;
+    allSpaces.reserve(ntotal);
+
+    for (size_t i = 0; i < n; i++) {
+        for (auto j = 0; j < num_spaces [i]; j++) {
+            allSpaces.push_back(i);
+        }
+    }
+
+    const size_t nfull = floor(prop_full * ntotal);
+    std::vector <size_t> index = parksearch::randomOrder(ntotal, nfull);
+
+    std::vector <size_t> fullSpaces (ntotal, 0L);
+    for (auto i: index) {
+        fullSpaces[allSpaces[i]]++;
+    }
+
+    for (int i = 0; i < n; i++) {
+        if (num_spaces [i] > 0) {
+            p_empty [i] = 1 - fullSpaces [i] / static_cast<double>(num_spaces [i]);
+        }
+    }
+
+    return p_empty;
+}
+
+//' rcpp_park_search
+//'
+//' @noRd
+// [[Rcpp::export]]
+double rcpp_park_search (const Rcpp::DataFrame graph,
+        const Rcpp::List edge_map_in,
+        const Rcpp::List edge_map_rev_in,
+        const double prop_full,
+        const int start_vert)
+{
+
+    Rcpp::RNGScope scope;
+
+    parksearch::EdgeMapType edgeMap, edgeMapRev;
+    parksearch::makeEdgeMaps (edge_map_in, edge_map_rev_in, edgeMap, edgeMapRev);
+
+    std::vector <int> num_spaces = graph ["np"];
+    std::vector <double> p_empty = parksearch::fill_parking_spaces (num_spaces, prop_full);
 
     std::vector <double> dist = graph ["d"];
-    std::vector <double> p_empty = graph ["p_empty"];
     std::vector <double> d_to_empty = graph ["d_to_empty"];
 
     size_t nedges = static_cast <size_t> (graph.nrow ());
