@@ -49,9 +49,10 @@ buildings_to_highways <- function (osmdat) {
 
 parking_time_matrix <- function (osmdat) {
 
-    b <- buildings_to_highways (osmdat)
+    # suppress no visible binding notes:
+    name <- NULL
 
-    f <- dodgr_wp_to_20 ()
+    b <- buildings_to_highways (osmdat)
 
     # Travel times between all pairs of buildings, so between all buildings and
     # parking spaces.
@@ -60,7 +61,6 @@ parking_time_matrix <- function (osmdat) {
         net <- dodgr::weight_streetnet (
             osmdat$dat_sc,
             wt_profile = wp,
-            wt_profile_file = f,
             turn_penalty = TRUE
         )
 
@@ -73,8 +73,6 @@ parking_time_matrix <- function (osmdat) {
 
         return (tmat)
     })
-
-    file.remove (f)
 
     # Then to find travel times to major parking facilities, first find for
     # each building the nearest entry point in the bounding highways.
@@ -134,27 +132,115 @@ parking_time_matrix <- function (osmdat) {
     list (buildings = b, tmat_car = tmats [[1]], tmat_foot = tmats [[2]])
 }
 
-#' Set max speed in dodgr weighting profile to 20km/h, reflective of driving
-#' speeds while searching for car parks.
+parking_as_dodgr_net <- function (osmdat) {
+
+    # suppress no visible binding notes:
+    key <- value <- name <- object_ <- .vx0 <- .vx1 <-
+        edge_ <- d <- highway <- lanes <- osm_id <-
+        num_parking_spaces <- edge_new <- NULL
+
+    requireNamespace ("fs")
+
+    net <- dodgr::weight_streetnet (
+        osmdat$dat_sc,
+        wt_profile = "motorcar",
+        turn_penalty = TRUE
+    )
+
+    # Reduce highways to those both within and surrounding defined bounding
+    # polygon:
+    ids <- unique (osmdat$highways$osm_id)
+    names <- osmdat$dat_sc$object |>
+        dplyr::filter (key == "name") |>
+        dplyr::select (!key) |>
+        dplyr::rename (name = value)
+    these_names <- c (unique (osmdat$highways$name, osmdat$hw_names))
+    names <- names |>
+        dplyr::filter (name %in% osmdat$highways$name)
+    hws <- reduce_osm_highways (osmdat$highways, osmdat$hw_names)
+    ids <- unique (c (ids, names$object_), hws$osm_id, )
+    net <- dplyr::filter (net, object_ %in% ids)
+
+    names <- osmdat$dat_sc$object |>
+        dplyr::filter (key == "name") |>
+        dplyr::select (!key) |>
+        dplyr::rename (name = value)
+    net <- dplyr::left_join (net, names, by = "object_") |>
+        dplyr::select (.vx0, .vx1, edge_, d, object_, highway, lanes, name)
+
+    # Extract car parking data, and add original OSM id values from full graph:
+    parking <- car_parking_areas (osmdat) |>
+        sf::st_drop_geometry () |>
+        dplyr::select (osm_id, num_parking_spaces)
+    index <- match (parking$osm_id, net$object_)
+    parking$edge_old <- net$edge_ [index]
+
+    netc <- dodgr::dodgr_contract_graph (net)
+
+    # Then read cached edge map and aggregate all parking on to contracted
+    # edges:
+    hashc <- attr (netc, "hashc")
+    tmpfiles <- fs::dir_ls (fs::path_temp (), regexp = paste0 (hashc, "\\.Rds$"))
+    edge_map <- readRDS (grep ("edge", tmpfiles, value = TRUE))
+    parking <- dplyr::left_join (parking, edge_map, by = "edge_old")
+
+    index <- which (is.na (parking$edge_new))
+    parking$edge_new [index] <- parking$edge_old [index]
+    parking <- dplyr::group_by (parking, edge_new) |>
+        dplyr::summarise (num_parking_spaces = sum (num_parking_spaces)) |>
+        dplyr::ungroup () |>
+        dplyr::rename (edge_ = edge_new, np = num_parking_spaces)
+
+    netc <- dplyr::left_join (netc, parking, by = "edge_")
+    index <- which (is.na (netc$np))
+    netc$np [index] <- 0L
+
+    return (netc)
+}
+
+fill_parking_spaces <- function (net, prop_full = 0.8) {
+
+    p <- rep (net$edge_, times = net$np)
+
+    p_filled <- table (sample (p, size = floor (prop_full * length (p))))
+    p_filled <- data.frame (
+        edge_ = names (p_filled),
+        n_filled = as.integer (p_filled)
+    )
+    if ("n_filled" %in% names (net)) {
+        net$n_filled <- NA_integer_
+        net$n_filled <- p_filled$n_filled [match (net$edge_, p_filled$edge_)]
+    } else {
+        net <- dplyr::left_join (net, p_filled, by = "edge_")
+    }
+    net$n_filled [which (is.na (net$n_filled))] <- 0L
+    net$n_empty <- net$np - net$n_filled
+    net$p_empty <- 0
+    index <- which (net$np > 0)
+    net$p_empty [index] <- net$n_empty [index] / net$np [index]
+
+    index <- which (net$np > 0)
+    net$d_to_empty <- 0
+    dprop <- apply (cbind (net$np, net$n_empty) [index, ], 1, function (i) {
+        expected_min_d (i [1], i [1] - i [2])
+    })
+    net$d_to_empty [index] <- net$d [index] * dprop / net$np [index]
+    net$d_to_empty [which (net$n_empty == 0L)] <- net$d [which (net$n_empty == 0L)]
+
+    return (net)
+}
+
+#' Map unique vertex names to sequential numbers in matrix
+#'
+#' Adapted from same fn in dodgr/R/dists.R
 #' @noRd
-dodgr_wp_to_20 <- function (max_speed = 20) {
+make_vert_map <- function (graph) {
 
-    requireNamespace ("jsonlite", quietly = TRUE)
-
-    f <- tempfile (fileext = ".json")
-    dodgr::write_dodgr_wt_profile (file = f)
-    wt_profiles <- jsonlite::read_json (f, simplify = TRUE)
-    wp <- wt_profiles$weighting_profiles
-
-    index <- which (wp$name == "motorcar" & wp$max_speed > max_speed)
-    wp$max_speed [index]
-    wp$max_speed [index] <- max_speed
-
-    wt_profiles$weighting_profiles <- wp
-
-    jsonlite::write_json (wt_profiles, f)
-
-    return (f)
+    verts <- unique (c (graph$.vx0, graph$.vx1))
+    data.frame (
+        vert = verts,
+        id = seq_along (verts) - 1L
+    )
 }
 
 #' Sample `n` values from a series, `d`, and return the expected minimum of the
@@ -166,43 +252,29 @@ dodgr_wp_to_20 <- function (max_speed = 20) {
 #' @noRd
 expected_min_d <- function (d, n = 2) {
 
-    if (n <= 0 || n >= length (d)) {
-        stop ("Sample size n must be between 1 and N-1")
-    }
-
-    freq_table <- table (d)
-    unique_vals <- as.numeric (names (freq_table))
-    freq_counts <- as.numeric (freq_table)
-
-    sorted_order <- order (unique_vals)
-    unique_vals <- unique_vals [sorted_order]
-    freq_counts <- freq_counts [sorted_order]
-
-    ntot <- length (d)
-    comb_total <- choose (ntot, n)
+    comb_total <- choose (d, n)
     val <- 0.0
 
-    for (i in seq (1, length (unique_vals))) {
+    for (i in seq (1, d)) {
 
-        v <- unique_vals [i]
-        n_to_v <- sum (freq_counts [1:i])
-        n_lt_v <- ifelse (i > 1, sum (freq_counts [1:(i - 1)]), 0)
+        n_to_i <- sum (1:i)
+        n_lt_i <- ifelse (i > 1, sum (1:(i - 1)), 0)
 
-        if (n_lt_v > n) {
+        if (n_lt_i > n) {
             prob_all_n_lt_sampled <- 0
         } else {
-            prob_all_n_lt_sampled <- choose (ntot - n_lt_v, n - n_lt_v) / comb_total
+            prob_all_n_lt_sampled <- choose (d - n_lt_i, n - n_lt_i) / comb_total
         }
 
-        if (n_to_v > n) {
+        if (n_to_i > n) {
             prob_all_n_sampled <- 0
         } else {
-            prob_all_n_sampled <- choose (ntot - n_to_v, n - n_to_v) / comb_total
+            prob_all_n_sampled <- choose (d - n_to_i, n - n_to_i) / comb_total
         }
 
         p <- prob_all_n_lt_sampled - prob_all_n_sampled
 
-        val <- val + v * p
+        val <- val + i * p
     }
 
     return (val)

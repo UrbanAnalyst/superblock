@@ -4,7 +4,7 @@
 \name{superblock-package}
 \alias{superblock}
 \alias{superblock-package}
-\title{superblock: Analyses of potential superblock}
+\title{superblock package.}
 \description{
 Analyses of potential superblocks.
 }
