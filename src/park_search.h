@@ -20,5 +20,6 @@ size_t make_vert_map (const Rcpp::DataFrame &vert_map_in,
         std::map <std::string, size_t> &vert_map);
 } // end namespace parksearch
 
-Rcpp::NumericMatrix rcpp_park_search (const Rcpp::DataFrame graph,
-        const Rcpp::DataFrame vert_map_in);
+double rcpp_park_search (const Rcpp::DataFrame graph,
+        const Rcpp::DataFrame vert_map_in,
+        const int start_vert);
