@@ -74,8 +74,6 @@ parking_time_matrix <- function (osmdat) {
         return (tmat)
     })
 
-    file.remove (f)
-
     # Then to find travel times to major parking facilities, first find for
     # each building the nearest entry point in the bounding highways.
     net <- dodgr::weight_streetnet (
