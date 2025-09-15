@@ -22,6 +22,12 @@ std::vector <size_t> randomOrder (size_t ntotal, size_t n);
 
 std::vector <double> fillParkingSpaces (std::vector <int> num_spaces, double prop_full);
 
+void fill_d_to_empty (
+    const std::vector <int> &num_spaces,
+    const std::vector <double> &dist,
+    std::vector <double> &d_to_empty,
+    const double prop_full);
+
 double oneParkSearch (
     const parksearch::EdgeMapType &edgeMap,
     const parksearch::EdgeMapType &edgeMapRev,

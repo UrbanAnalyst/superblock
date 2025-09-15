@@ -127,6 +127,23 @@ double parksearch::oneParkSearch (
     return search_dist;
 }
 
+void parksearch::fill_d_to_empty (
+    const std::vector <int> &num_spaces,
+    const std::vector <double> &dist,
+    std::vector <double> &d_to_empty,
+    const double prop_full) {
+
+    const size_t nedges = d_to_empty.size();
+    std::fill (d_to_empty.begin(), d_to_empty.end(), 0.0);
+
+    for (int i = 0; i < nedges; i++) {
+        if (num_spaces [i] > 0) {
+            double dprop = utils::expected_min_d (num_spaces [i], floor(num_spaces[i] * prop_full));
+            d_to_empty[i] = dist[i] * dprop / num_spaces[i];
+        }
+    }
+}
+
 //' rcpp_park_search
 //'
 //' @noRd
@@ -149,14 +166,7 @@ double rcpp_park_search (const Rcpp::DataFrame graph,
     size_t nedges = static_cast <size_t> (graph.nrow ());
     std::vector <double> p_empty = parksearch::fillParkingSpaces (num_spaces, prop_full);
     std::vector <double> d_to_empty(nedges, 0.0);
-    for (int i = 0; i < nedges; i++) {
-        if (num_spaces [i] > 0) {
-            double dprop = utils::expected_min_d (num_spaces [i], floor(num_spaces[i] * prop_full));
-            d_to_empty[i] = dist[i] * dprop / num_spaces[i];
-        }
-    }
-
-    std::vector <int> nvisits (nedges, 0L);
+    parksearch::fill_d_to_empty(num_spaces, dist, d_to_empty, prop_full);
 
     double search_dist = parksearch::oneParkSearch (
         edgeMap, edgeMapRev, dist, p_empty, nedges, start_vert);

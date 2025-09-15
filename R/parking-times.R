@@ -198,30 +198,6 @@ parking_as_dodgr_net <- function (osmdat) {
     return (netc)
 }
 
-fill_parking_spaces <- function (net, prop_full = 0.8) {
-
-    p <- rep (net$edge_, times = net$np)
-
-    p_filled <- table (sample (p, size = floor (prop_full * length (p))))
-    p_filled <- data.frame (
-        edge_ = names (p_filled),
-        n_filled = as.integer (p_filled)
-    )
-    if ("n_filled" %in% names (net)) {
-        net$n_filled <- NA_integer_
-        net$n_filled <- p_filled$n_filled [match (net$edge_, p_filled$edge_)]
-    } else {
-        net <- dplyr::left_join (net, p_filled, by = "edge_")
-    }
-    net$n_filled [which (is.na (net$n_filled))] <- 0L
-    net$n_empty <- net$np - net$n_filled
-    net$p_empty <- 0
-    index <- which (net$np > 0)
-    net$p_empty [index] <- net$n_empty [index] / net$np [index]
-
-    return (net)
-}
-
 make_edge_to_edge_map <- function (graph, rev = FALSE) {
 
     if (!rev) {
