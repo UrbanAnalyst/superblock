@@ -41,8 +41,10 @@ Rcpp::NumericMatrix rcpp_park_search (const Rcpp::DataFrame graph,
 {
     std::vector <std::string> from = graph [".vx0"];
     std::vector <std::string> to = graph [".vx1"];
+    std::vector <std::string> edge = graph ["edge_"];
     std::vector <double> dist = graph ["d"];
-    std::vector <double> wt = dist;
+    std::vector <double> p_empty = graph ["p_empty"];
+    std::vector <double> d_to_empty = graph ["d_to_empty"];
 
     size_t nedges = static_cast <size_t> (graph.nrow ());
     std::map <std::string, size_t> vert_map;

@@ -191,13 +191,45 @@ parking_as_dodgr_net <- function (osmdat) {
     parking <- dplyr::group_by (parking, edge_new) |>
         dplyr::summarise (num_parking_spaces = sum (num_parking_spaces)) |>
         dplyr::ungroup () |>
-        dplyr::rename (edge_ = edge_new)
+        dplyr::rename (edge_ = edge_new, np = num_parking_spaces)
 
     netc <- dplyr::left_join (netc, parking, by = "edge_")
-    index <- which (is.na (netc$num_parking_spaces))
-    netc$num_parking_spaces [index] <- 0L
+    index <- which (is.na (netc$np))
+    netc$np [index] <- 0L
 
     return (netc)
+}
+
+fill_parking_spaces <- function (net, prop_full = 0.8) {
+
+    p <- rep (net$edge_, times = net$np)
+
+    p_filled <- table (sample (p, size = floor (prop_full * length (p))))
+    p_filled <- data.frame (
+        edge_ = names (p_filled),
+        n_filled = as.integer (p_filled)
+    )
+    if ("n_filled" %in% names (net)) {
+        net$n_filled <- NA_integer_
+        net$n_filled <- p_filled$n_filled [match (net$edge_, p_filled$edge_)]
+    } else {
+        net <- dplyr::left_join (net, p_filled, by = "edge_")
+    }
+    net$n_filled [which (is.na (net$n_filled))] <- 0L
+    net$n_empty <- net$np - net$n_filled
+    net$p_empty <- 0
+    index <- which (net$np > 0)
+    net$p_empty [index] <- net$n_empty [index] / net$np [index]
+
+    index <- which (net$np > 0)
+    net$d_to_empty <- 0
+    dprop <- apply (cbind (net$np, net$n_empty) [index, ], 1, function (i) {
+        expected_min_d (i [1], i [1] - i [2])
+    })
+    net$d_to_empty [index] <- net$d [index] * dprop / net$np [index]
+    net$d_to_empty [which (net$n_empty == 0L)] <- net$d [which (net$n_empty == 0L)]
+
+    return (net)
 }
 
 #' Map unique vertex names to sequential numbers in matrix
@@ -222,43 +254,29 @@ make_vert_map <- function (graph) {
 #' @noRd
 expected_min_d <- function (d, n = 2) {
 
-    if (n <= 0 || n >= length (d)) {
-        stop ("Sample size n must be between 1 and N-1")
-    }
-
-    freq_table <- table (d)
-    unique_vals <- as.numeric (names (freq_table))
-    freq_counts <- as.numeric (freq_table)
-
-    sorted_order <- order (unique_vals)
-    unique_vals <- unique_vals [sorted_order]
-    freq_counts <- freq_counts [sorted_order]
-
-    ntot <- length (d)
-    comb_total <- choose (ntot, n)
+    comb_total <- choose (d, n)
     val <- 0.0
 
-    for (i in seq (1, length (unique_vals))) {
+    for (i in seq (1, d)) {
 
-        v <- unique_vals [i]
-        n_to_v <- sum (freq_counts [1:i])
-        n_lt_v <- ifelse (i > 1, sum (freq_counts [1:(i - 1)]), 0)
+        n_to_i <- sum (1:i)
+        n_lt_i <- ifelse (i > 1, sum (1:(i - 1)), 0)
 
-        if (n_lt_v > n) {
+        if (n_lt_i > n) {
             prob_all_n_lt_sampled <- 0
         } else {
-            prob_all_n_lt_sampled <- choose (ntot - n_lt_v, n - n_lt_v) / comb_total
+            prob_all_n_lt_sampled <- choose (d - n_lt_i, n - n_lt_i) / comb_total
         }
 
-        if (n_to_v > n) {
+        if (n_to_i > n) {
             prob_all_n_sampled <- 0
         } else {
-            prob_all_n_sampled <- choose (ntot - n_to_v, n - n_to_v) / comb_total
+            prob_all_n_sampled <- choose (d - n_to_i, n - n_to_i) / comb_total
         }
 
         p <- prob_all_n_lt_sampled - prob_all_n_sampled
 
-        val <- val + v * p
+        val <- val + i * p
     }
 
     return (val)
