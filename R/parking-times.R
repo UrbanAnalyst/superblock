@@ -207,3 +207,70 @@ make_edge_to_edge_map <- function (graph, rev = FALSE) {
     }
     return (ret)
 }
+
+# Frmo dodgr:
+swap_cols <- function (x, cola, colb) {
+    temp <- x [[cola]]
+    x [[cola]] <- x [[colb]]
+    x [[colb]] <- temp
+    return (x)
+}
+
+#' Convert a contracted network weighted for motorcar routing to an equivalent
+#' pedestrian network.
+#'
+#' @param walk_speed In km/hr
+#' @noRd
+net_to_walk <- function (net, walk_speed = 5.0) {
+
+    net_new <- net
+    net_new <- swap_cols (net_new, ".vx0", ".vx1")
+    net_new$edge_ <- paste0 (net_new$edge_, "_rev")
+
+    v_old <- paste0 (net$.vx0, "-", net$.vx1)
+    v_new <- paste0 (net_new$.vx0, "-", net_new$.vx1)
+    index <- which (!v_new %in% v_old)
+    net_new <- net_new [index, ]
+
+    net_new <- rbind (net, net_new)
+
+    # Then adjust distances to walking times:
+    net_new$d <- net_new$d * 60 / (walk_speed * 1000)
+
+    # Create new df to remove all dodgr attributes:
+    data.frame (
+        from = net_new$.vx0,
+        to = net_new$.vx1,
+        edge_ = net_new$edge_,
+        d = net_new$d
+    )
+}
+
+
+parking_time_simulate <- function (net,
+                                   net_walk,
+                                   emap,
+                                   emap_rev,
+                                   prop_full,
+                                   start_edge,
+                                   ntrials) {
+
+    res <- rcpp_park_search (
+        net, emap, emap_rev,
+        prop_full = prop_full, start_edge = start_edge, ntrials = ntrials
+    )
+    res <- res [which (res$d > 0), ]
+    if (nrow (res) == 0L) {
+        return (c (NA_real_, NA_real_))
+    }
+
+    vfr <- rep (net$.vx0 [start_edge], times = ntrials)
+    vto <- net$.vx1 [res$edge]
+    d_walk <- dodgr::dodgr_dists (net_walk, from = vfr, to = vto, pairwise = TRUE)
+
+    # Convert initial distance to time:
+    m_to_time <- 60 / 10000 # 10km / hr
+    d0 <- res$d * m_to_time
+
+    c (mean (d0), mean (d_walk))
+}

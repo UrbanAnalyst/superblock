@@ -75,14 +75,14 @@ std::vector <double> parksearch::fillParkingSpaces (std::vector <int> num_spaces
     return p_empty;
 }
 
-double parksearch::oneParkSearch (
+std::vector<double> parksearch::oneParkSearch (
     const parksearch::EdgeMapType &edgeMap,
     const parksearch::EdgeMapType &edgeMapRev,
     std::vector <double> &dist,
     std::vector <double> &d_to_empty,
     std::vector <double> &p_empty,
     const size_t nedges,
-    const size_t start_vert
+    const size_t start_edge
 ) {
 
     std::vector <int> nvisits (nedges, 0L);
@@ -91,7 +91,7 @@ double parksearch::oneParkSearch (
     bool found = false;
     size_t n_iter = 0L;
 
-    size_t i = start_vert - 1L; // Convert 1-based R value to 0-based C++
+    size_t i = start_edge - 1L; // Convert 1-based R value to 0-based C++
 
     while (!found && n_iter < 1000) {
 
@@ -129,7 +129,9 @@ double parksearch::oneParkSearch (
         search_dist = -1;
     }
 
-    return search_dist;
+    std::vector<double> res = { static_cast<double>(i), search_dist };
+
+    return res;
 }
 
 void parksearch::fill_d_to_empty (
@@ -153,11 +155,11 @@ void parksearch::fill_d_to_empty (
 //'
 //' @noRd
 // [[Rcpp::export]]
-double rcpp_park_search (const Rcpp::DataFrame graph,
+Rcpp::DataFrame rcpp_park_search (const Rcpp::DataFrame graph,
         const Rcpp::List edge_map_in,
         const Rcpp::List edge_map_rev_in,
         const double prop_full,
-        const int start_vert,
+        const int start_edge,
         const size_t ntrials)
 {
 
@@ -170,8 +172,9 @@ double rcpp_park_search (const Rcpp::DataFrame graph,
     std::vector <int> num_spaces = graph ["np"];
     size_t nedges = static_cast <size_t> (graph.nrow ());
 
-    int count = 0;
-    double search_dist = 0;
+    Rcpp::IntegerVector edge (ntrials);
+    Rcpp::NumericVector d (ntrials);
+
     for (int n = 0; n < ntrials; n++) {
 
         std::vector <double> p_empty = parksearch::fillParkingSpaces (num_spaces, prop_full);
@@ -179,14 +182,18 @@ double rcpp_park_search (const Rcpp::DataFrame graph,
         std::vector <double> d_to_empty(nedges, 0.0);
         parksearch::fill_d_to_empty(num_spaces, dist, d_to_empty, prop_full);
 
-        double res = parksearch::oneParkSearch (
-            edgeMap, edgeMapRev, dist, d_to_empty, p_empty, nedges, start_vert);
+        std::vector<double> res = parksearch::oneParkSearch (
+            edgeMap, edgeMapRev, dist, d_to_empty, p_empty, nedges, start_edge);
 
-        if (res > 0) {
-            count++;
-            search_dist += res;
-        }
+        edge(n) = res[0];
+        d(n) = res[1];
     }
 
-    return search_dist / static_cast<double>(count);
+    Rcpp::DataFrame res = Rcpp::DataFrame::create (
+        Rcpp::Named ("edge") = edge,
+        Rcpp::Named ("d") = d,
+        Rcpp::_["stringsAsFactors"] = false
+    );
+
+    return res;
 }
