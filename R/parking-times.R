@@ -1,3 +1,63 @@
+#' Esimate times to park cars within superblock, compared with times to park in
+#' nearby parking facilities and walk back.
+#'
+#' @param osmdat Result of \link{sb_osmdata_extract} function, containing all
+#' primary data needed for analyses.
+#' @param n_props Number of park-filling proportions used to esimtate times.
+#' @param ntrials Number of random simulations for each value of `n_props` used
+#' to generate average values.
+#' @aparam added_time_to_park Additional minutes added on to the estimate of
+#' time to park a car in a nearby facility, representing time to travel within
+#' the facility to a parking space. Value is in minutes.
+#' @export
+sb_parking_times <- function (osmdat, n_props = 20L, ntrials = 100L, added_time_to_park = 2) {
+
+    requiNamespace ("pbapply")
+
+    net <- parking_as_dodgr_net (osmdat)
+    net_walk <- net_to_walk (net)
+    tmats <- parking_time_matrix (osmdat)
+
+    emap <- make_edge_to_edge_map (net)
+    emap_rev <- make_edge_to_edge_map (net, rev = TRUE)
+
+    prop <- 1 - (log (n_props + 2) - log (seq_len (n_props + 2))) / log (n_props + 2)
+    prop <- prop [-c (1, n_props + 2)]
+
+    index <- which (!is.na (net$name) & !net$name %in% osmdat$hw_names)
+    res <- pbapply::pblapply (prop, function (p) {
+        res_p <- t (vapply (
+            index, function (i) {
+                parking_time_simulate (net, net_walk, emap, emap_rev, prop_full = p, start_edge = i, ntrials = ntrials)
+            }, numeric (2L)
+        ))
+        # 2 cols for (out with car, back by foot) times
+
+        # Then also add equivalent (out, back) times to parking facilities:
+        v0 <- net$.vx0 [index]
+        v1 <- net$.vx1 [index]
+        xy0 <- osmdat$dat_sc$vertex [match (v0, osmdat$dat_sc$vertex$vertex_), ]
+        xy1 <- osmdat$dat_sc$vertex [match (v1, osmdat$dat_sc$vertex$vertex_), ]
+        edge_xy <- data.frame (
+            lon = (xy0$x_ + xy1$x_) / 2,
+            lat = (xy0$y_ + xy1$y_) / 2
+        )
+        index <- geodist::geodist_min (edge_xy, tmats$buildings)
+        tmat_cols <- c ("time_to_parking", "time_from_parking")
+        park_times <- tmats$buildings [index, tmat_cols] / 60
+
+        res_p <- cbind (res_p, park_times)
+
+        colMeans (res_p, na.rm = TRUE)
+    })
+    res <- data.frame (cbind (prop, do.call (rbind, res)))
+    names (res) <- c ("prop", "to", "from", "to_park", "from_park")
+
+    res$to_park <- res$to_park + added_time_to_park
+
+    return (res)
+}
+
 #' Map building polygons to nearest highway nodes, and also add estimated
 #' number of parking spaces for each building.
 #'
@@ -218,7 +278,7 @@ parking_as_dodgr_net <- function (osmdat) {
     return (netc)
 }
 
-make_edge_to_edge_map <- function (graph, rev = FALSE) {
+make_edge_to_edge_map <- function (net, rev = FALSE) {
 
     if (!rev) {
         ret <- lapply (net$.vx1, function (i) which (net$.vx0 == i) - 1L)
