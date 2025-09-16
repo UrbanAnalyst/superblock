@@ -32,6 +32,7 @@ double oneParkSearch (
     const parksearch::EdgeMapType &edgeMap,
     const parksearch::EdgeMapType &edgeMapRev,
     std::vector <double> &dist,
+    std::vector <double> &d_to_empty,
     std::vector <double> &p_empty,
     const size_t nedges,
     const size_t start_vert

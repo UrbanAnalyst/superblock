@@ -79,6 +79,7 @@ double parksearch::oneParkSearch (
     const parksearch::EdgeMapType &edgeMap,
     const parksearch::EdgeMapType &edgeMapRev,
     std::vector <double> &dist,
+    std::vector <double> &d_to_empty,
     std::vector <double> &p_empty,
     const size_t nedges,
     const size_t start_vert
@@ -99,8 +100,7 @@ double parksearch::oneParkSearch (
         if (p_empty [i] < 1.0e-12) {
             search_dist += dist [i];
         } else {
-            // search_dist += d_to_empty [i];
-            search_dist += dist [i];
+            search_dist += d_to_empty [i];
             break;
         }
 
@@ -111,6 +111,7 @@ double parksearch::oneParkSearch (
         std::unordered_set <size_t> edgeSet = edgeMap.at (i);
         if (edgeSet.size () == 0) {
             edgeSet = edgeMapRev.at (i);
+            search_dist += dist [i];
         }
         for (auto s: edgeSet) {
             if (nvisits [s] < nextVisits) {
@@ -122,6 +123,10 @@ double parksearch::oneParkSearch (
         if (next_i > -1) {
             i = next_i;
         }
+    }
+
+    if (n_iter >= 1000) {
+        search_dist = -1;
     }
 
     return search_dist;
@@ -165,16 +170,23 @@ double rcpp_park_search (const Rcpp::DataFrame graph,
     std::vector <int> num_spaces = graph ["np"];
     size_t nedges = static_cast <size_t> (graph.nrow ());
 
+    int count = 0;
     double search_dist = 0;
     for (int n = 0; n < ntrials; n++) {
 
         std::vector <double> p_empty = parksearch::fillParkingSpaces (num_spaces, prop_full);
+
         std::vector <double> d_to_empty(nedges, 0.0);
         parksearch::fill_d_to_empty(num_spaces, dist, d_to_empty, prop_full);
 
-        search_dist += parksearch::oneParkSearch (
-            edgeMap, edgeMapRev, dist, p_empty, nedges, start_vert);
+        double res = parksearch::oneParkSearch (
+            edgeMap, edgeMapRev, dist, d_to_empty, p_empty, nedges, start_vert);
+
+        if (res > 0) {
+            count++;
+            search_dist += res;
+        }
     }
 
-    return search_dist / static_cast<double>(ntrials);
+    return search_dist / static_cast<double>(count);
 }
