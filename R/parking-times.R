@@ -257,7 +257,9 @@ parking_time_simulate <- function (net,
 
     res <- rcpp_park_search (
         net, emap, emap_rev,
-        prop_full = prop_full, start_edge = start_edge, ntrials = ntrials
+        prop_full = prop_full,
+        start_edge = start_edge,
+        ntrials = ntrials
     )
     res <- res [which (res$d > 0), ]
     if (nrow (res) == 0L) {
@@ -267,6 +269,11 @@ parking_time_simulate <- function (net,
     vfr <- rep (net$.vx0 [start_edge], times = ntrials)
     vto <- net$.vx1 [res$edge]
     d_walk <- dodgr::dodgr_dists (net_walk, from = vfr, to = vto, pairwise = TRUE)
+
+    # Then subtract average of half the walking times from first and last
+    # edges:
+    t_minus <- (net_walk$d [start_edge] + net_walk$d [res$edge]) / 2
+    d_walk <- d_walk - t_minus
 
     # Convert initial distance to time:
     m_to_time <- 60 / 10000 # 10km / hr
