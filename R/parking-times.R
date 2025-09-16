@@ -290,7 +290,7 @@ parking_time_simulate <- function (net,
         return (c (NA_real_, NA_real_))
     }
 
-    vfr <- rep (net$.vx0 [start_edge], times = ntrials)
+    vfr <- rep (net$.vx0 [start_edge], times = nrow (res))
     vto <- net$.vx1 [res$edge]
 
     # Then map to nearest verts in net_walk:
@@ -302,7 +302,7 @@ parking_time_simulate <- function (net,
     xyto_w <- net_walk [, c ("to_x", "to_y")]
     xyto <- net [res$edge, c (".vx1_x", ".vx1_y")]
     index <- geodist::geodist_min (xyto, xyto_w)
-    xto <- net_walk$toom [index]
+    xto <- net_walk$to [index]
 
     d_walk <- dodgr::dodgr_dists (net_walk, from = vfr, to = vto, pairwise = TRUE)
 
