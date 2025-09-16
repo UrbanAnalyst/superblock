@@ -82,12 +82,14 @@ parking_time_matrix <- function (osmdat) {
         turn_penalty = TRUE
     )
     v <- dodgr::dodgr_vertices (net)
-    index <- dodgr::match_points_to_verts (v, b [, c ("lon", "lat")])
+    v_from <- v [which (v$id %in% net$.vx0), ]
+    index <- dodgr::match_points_to_verts (v_from, b [, c ("lon", "lat")])
     from_ids <- v$id [index]
 
     to_pts <- sf::st_coordinates (osmdat$parking_facilities)
-    index <- dodgr::match_points_to_verts (v, to_pts)
-    to_ids <- v$id [index]
+    v_to <- v [which (v$id %in% net$.vx1), ]
+    index <- dodgr::match_points_to_verts (v_to, to_pts)
+    to_ids <- v_to$id [index]
 
     # Then route from buildings to parking facilities, but only start at first
     # vertex that is not within the bounding polygon.
@@ -111,6 +113,15 @@ parking_time_matrix <- function (osmdat) {
         names (path_ends) <- c ("b_from", "p_to", "b_from_remap", "p_to_remap")
 
         index <- match (from_ids, path_ends$b_from)
+        # But not all paths are traversable, so revert any that aren't back to
+        # original start points:
+        index_na <- which (is.na (index))
+        from_xy <- net [match (from_ids [index_na], net$.vx0), c (".vx0_x", ".vx0_y")]
+        b_from_xy <- net [match (path_ends$b_from_remap, net$.vx0), c (".vx0_x", ".vx0_y")]
+        names (from_xy) <- names (b_from_xy) <- c ("x", "y")
+        index_min <- geodist::geodist_min (from_xy, b_from_xy)
+        index [index_na] <- index_min
+
         from_ids <- path_ends$b_from_remap [index]
         # Those are then from vertices closest to each building which head directly
         # to a parking facility.
