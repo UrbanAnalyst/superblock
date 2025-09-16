@@ -152,7 +152,8 @@ double rcpp_park_search (const Rcpp::DataFrame graph,
         const Rcpp::List edge_map_in,
         const Rcpp::List edge_map_rev_in,
         const double prop_full,
-        const int start_vert)
+        const int start_vert,
+        const size_t ntrials)
 {
 
     Rcpp::RNGScope scope;
@@ -162,14 +163,18 @@ double rcpp_park_search (const Rcpp::DataFrame graph,
 
     std::vector <double> dist = graph ["d"];
     std::vector <int> num_spaces = graph ["np"];
-
     size_t nedges = static_cast <size_t> (graph.nrow ());
-    std::vector <double> p_empty = parksearch::fillParkingSpaces (num_spaces, prop_full);
-    std::vector <double> d_to_empty(nedges, 0.0);
-    parksearch::fill_d_to_empty(num_spaces, dist, d_to_empty, prop_full);
 
-    double search_dist = parksearch::oneParkSearch (
-        edgeMap, edgeMapRev, dist, p_empty, nedges, start_vert);
+    double search_dist = 0;
+    for (int n = 0; n < ntrials; n++) {
 
-    return search_dist;
+        std::vector <double> p_empty = parksearch::fillParkingSpaces (num_spaces, prop_full);
+        std::vector <double> d_to_empty(nedges, 0.0);
+        parksearch::fill_d_to_empty(num_spaces, dist, d_to_empty, prop_full);
+
+        search_dist += parksearch::oneParkSearch (
+            edgeMap, edgeMapRev, dist, p_empty, nedges, start_vert);
+    }
+
+    return search_dist / static_cast<double>(ntrials);
 }

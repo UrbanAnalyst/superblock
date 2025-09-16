@@ -43,4 +43,5 @@ double rcpp_park_search (const Rcpp::DataFrame graph,
         const Rcpp::List edge_map_in,
         const Rcpp::List edge_map_rev_in,
         const double prop_full,
-        const int start_vert);
+        const int start_vert,
+        const size_t ntrials);
