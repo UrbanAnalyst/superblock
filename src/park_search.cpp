@@ -89,14 +89,14 @@ std::vector<double> parksearch::oneParkSearch (
 
     double search_dist = 0;
     bool found = false;
-    size_t n_iter = 0L;
+    int n_iter = 0L;
 
     size_t i = start_edge - 1L; // Convert 1-based R value to 0-based C++
     // Record 2nd edge for accurate calculation of distances when park is in
     // first edge.
     int second_edge = -1;
 
-    while (!found && n_iter < 1000) {
+    while (!found && n_iter < 1000L) {
 
         n_iter++;
 
@@ -135,6 +135,7 @@ std::vector<double> parksearch::oneParkSearch (
         search_dist = -1;
     }
 
+
     std::vector<double> res = { static_cast<double>(i), static_cast<double>(second_edge), search_dist };
 
     return res;
@@ -149,7 +150,7 @@ void parksearch::fill_d_to_empty (
     const size_t nedges = d_to_empty.size();
     std::fill (d_to_empty.begin(), d_to_empty.end(), 0.0);
 
-    for (int i = 0; i < nedges; i++) {
+    for (size_t i = 0; i < nedges; i++) {
         if (num_spaces [i] > 0) {
             double dprop = utils::expected_min_d (num_spaces [i], floor(num_spaces[i] * prop_full));
             d_to_empty[i] = dist[i] * dprop / num_spaces[i];
@@ -166,7 +167,7 @@ Rcpp::DataFrame rcpp_park_search (const Rcpp::DataFrame graph,
         const Rcpp::List edge_map_rev_in,
         const double prop_full,
         const int start_edge,
-        const size_t ntrials)
+        const int ntrials)
 {
 
     Rcpp::RNGScope scope;
