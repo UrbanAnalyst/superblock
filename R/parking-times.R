@@ -177,7 +177,10 @@ parking_as_dodgr_net <- function (osmdat) {
         dplyr::select (!key) |>
         dplyr::rename (name = value)
     net <- dplyr::left_join (net, names, by = "object_") |>
-        dplyr::select (.vx0, .vx1, edge_, d, object_, highway, lanes, name)
+        dplyr::select (
+            .vx0, .vx1, .vx0_x, .vx0_y, .vx1_x, .vx1_y,
+            edge_, d, object_, highway, lanes, name
+        )
 
     # Extract car parking data, and add original OSM id values from full graph:
     parking <- car_parking_areas (osmdat) |>
@@ -187,6 +190,12 @@ parking_as_dodgr_net <- function (osmdat) {
     parking$edge_old <- net$edge_ [index]
 
     netc <- dodgr::dodgr_contract_graph (net)
+    index <- match (netc$.vx0, net$.vx0)
+    netc$.vx0_x <- net$.vx0_x [index]
+    netc$.vx0_y <- net$.vx0_y [index]
+    index <- match (netc$.vx1, net$.vx1)
+    netc$.vx1_x <- net$.vx1_x [index]
+    netc$.vx1_y <- net$.vx1_y [index]
 
     # Then read cached edge map and aggregate all parking on to contracted
     # edges:
@@ -252,6 +261,10 @@ net_to_walk <- function (net, walk_speed = 5.0) {
     data.frame (
         from = net_new$.vx0,
         to = net_new$.vx1,
+        from_x = net_new$.vx0_x,
+        from_y = net_new$.vx0_y,
+        to_x = net_new$.vx1_x,
+        to_y = net_new$.vx1_y,
         edge_ = net_new$edge_,
         d = net_new$d
     )
@@ -279,6 +292,18 @@ parking_time_simulate <- function (net,
 
     vfr <- rep (net$.vx0 [start_edge], times = ntrials)
     vto <- net$.vx1 [res$edge]
+
+    # Then map to nearest verts in net_walk:
+    xyfr <- net [match (vfr, net$.vx0), c (".vx0_x", ".vx0_y")]
+    xyfr_w <- net_walk [, c ("from_x", "from_y")]
+    index <- geodist::geodist_min (xyfr, xyfr_w)
+    xfr <- net_walk$from [index]
+
+    xyto_w <- net_walk [, c ("to_x", "to_y")]
+    xyto <- net [res$edge, c (".vx1_x", ".vx1_y")]
+    index <- geodist::geodist_min (xyto, xyto_w)
+    xto <- net_walk$toom [index]
+
     d_walk <- dodgr::dodgr_dists (net_walk, from = vfr, to = vto, pairwise = TRUE)
 
     # Then subtract average of half the walking times from first and last
