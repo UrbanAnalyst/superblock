@@ -12,7 +12,7 @@
 #' @export
 sb_parking_times <- function (osmdat, n_props = 20L, ntrials = 100L, added_time_to_park = 2) {
 
-    requiNamespace ("pbapply")
+    requireNamespace ("pbapply")
 
     net <- parking_as_dodgr_net (osmdat)
     net_walk <- net_to_walk (net)
@@ -29,7 +29,7 @@ sb_parking_times <- function (osmdat, n_props = 20L, ntrials = 100L, added_time_
         res_p <- t (vapply (
             index, function (i) {
                 parking_time_simulate (net, net_walk, emap, emap_rev, prop_full = p, start_edge = i, ntrials = ntrials)
-            }, numeric (2L)
+            }, numeric (3L)
         ))
         # 2 cols for (out with car, back by foot) times
 

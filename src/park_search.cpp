@@ -92,6 +92,9 @@ std::vector<double> parksearch::oneParkSearch (
     size_t n_iter = 0L;
 
     size_t i = start_edge - 1L; // Convert 1-based R value to 0-based C++
+    // Record 2nd edge for accurate calculation of distances when park is in
+    // first edge.
+    int second_edge = -1;
 
     while (!found && n_iter < 1000) {
 
@@ -123,13 +126,16 @@ std::vector<double> parksearch::oneParkSearch (
         if (next_i > -1) {
             i = next_i;
         }
+        if (second_edge < 0) {
+            second_edge = i;
+        }
     }
 
     if (n_iter >= 1000) {
         search_dist = -1;
     }
 
-    std::vector<double> res = { static_cast<double>(i), search_dist };
+    std::vector<double> res = { static_cast<double>(i), static_cast<double>(second_edge), search_dist };
 
     return res;
 }
@@ -172,7 +178,7 @@ Rcpp::DataFrame rcpp_park_search (const Rcpp::DataFrame graph,
     std::vector <int> num_spaces = graph ["np"];
     size_t nedges = static_cast <size_t> (graph.nrow ());
 
-    Rcpp::IntegerVector edge (ntrials);
+    Rcpp::IntegerVector edge (ntrials), edge2 (ntrials);
     Rcpp::NumericVector d (ntrials);
 
     for (int n = 0; n < ntrials; n++) {
@@ -186,11 +192,13 @@ Rcpp::DataFrame rcpp_park_search (const Rcpp::DataFrame graph,
             edgeMap, edgeMapRev, dist, d_to_empty, p_empty, nedges, start_edge);
 
         edge(n) = res[0];
-        d(n) = res[1];
+        edge2(n) = res[1];
+        d(n) = res[2];
     }
 
     Rcpp::DataFrame res = Rcpp::DataFrame::create (
         Rcpp::Named ("edge") = edge,
+        Rcpp::Named ("next_edge") = edge2,
         Rcpp::Named ("d") = d,
         Rcpp::_["stringsAsFactors"] = false
     );
