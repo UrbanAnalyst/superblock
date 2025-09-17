@@ -193,7 +193,8 @@ Rcpp::DataFrame rcpp_park_search (const Rcpp::DataFrame graph,
             edgeMap, edgeMapRev, dist, d_to_empty, p_empty, nedges, start_edge);
 
         edge(n) = res[0] + 1L; // Conver back to 1-based R indexing
-        edge2(n) = res[1] + 1L;
+        edge2(n) = res[1];
+        if (edge2(n) > 0) { edge2(n)++; }
         d(n) = res[2];
     }
 

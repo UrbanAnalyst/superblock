@@ -377,9 +377,14 @@ parking_time_simulate <- function (net,
     t_minus <- (net_walk$d [start_edge] + net_walk$d [res$edge]) / 2
     d_walk <- d_walk - t_minus
 
+    # But where park is in start edge, just use that distance:
+    index <- which (res$next_edge < 0)
+    d_walk [index] <- res$d [index]
+
     # Convert initial distance to time:
     m_to_time <- 60 / 10000 # 10km / hr
     d0 <- res$d * m_to_time
+    d_walk <- d_walk * m_to_time
 
     c (mean (d0), mean (d_walk))
 }
