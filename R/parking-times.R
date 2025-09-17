@@ -4,18 +4,18 @@
 #' @param osmdat Result of \link{sb_osmdata_extract} function, containing all
 #' primary data needed for analyses.
 #' @param n_props Number of park-filling proportions used to esimtate times.
+#' @param prop_min Minimal proportion of filled parking spaces from which to
+#' start simulation. Low values close to zero and uninformative, as parking
+#' spaces are almost always available directly in front of buildings.
 #' @param ntrials Number of random simulations for each value of `n_props` used
 #' to generate average values.
-#' @param added_time_to_park Additional minutes added on to the estimate of
-#' time to park a car in a nearby facility, representing time to travel within
-#' the facility to a parking space. Value is in minutes.
 #' @return A `data.frame` of proportions of filled parking spaces and
 #' corresponding simulated times to (via car) from (walking) nearest available
 #' spaces. Columns are also included for corresponding times to and from nearby
 #' parking facilities ('to_park' and 'from_park'). all times are in minutes.
 #'
 #' @export
-sb_parking_times <- function (osmdat, n_props = 20L, ntrials = 100L, added_time_to_park = 2) {
+sb_parking_times <- function (osmdat, n_props = 10L, prop_min = 0.5, ntrials = 100L) {
 
     requireNamespace ("pbapply", quietly = TRUE)
 
@@ -25,9 +25,7 @@ sb_parking_times <- function (osmdat, n_props = 20L, ntrials = 100L, added_time_
 
     emap <- make_edge_to_edge_map (net)
     emap_rev <- make_edge_to_edge_map (net, rev = TRUE)
-
-    prop <- 1 - (log (n_props + 2) - log (seq_len (n_props + 2))) / log (n_props + 2)
-    prop <- prop [-c (1, n_props + 2)]
+    prop <- get_prop_sequence (prop_min = prop_min, n_props = n_props)
 
     index <- which (!is.na (net$name) & !net$name %in% osmdat$hw_names & net$np > 0)
     res <- pbapply::pblapply (prop, function (p) {
@@ -58,9 +56,14 @@ sb_parking_times <- function (osmdat, n_props = 20L, ntrials = 100L, added_time_
     res <- data.frame (cbind (prop, do.call (rbind, res)))
     names (res) <- c ("prop", "to", "from", "to_park", "from_park")
 
-    res$to_park <- res$to_park + added_time_to_park
-
     return (res)
+}
+
+get_prop_sequence <- function (prop_min = 0.5, n_props = 20) {
+
+    prop <- 1 - (log (n_props + 1) - log (seq_len (n_props + 1))) / log (n_props + 1)
+    prop <- prop_min + (1 - prop_min) * prop
+    prop [seq (1, n_props)]
 }
 
 #' Map building polygons to nearest highway nodes, and also add estimated

@@ -5,7 +5,7 @@
 \title{Esimate times to park cars within superblock, compared with times to park in
 nearby parking facilities and walk back.}
 \usage{
-sb_parking_times(osmdat, n_props = 20L, ntrials = 100L, added_time_to_park = 2)
+sb_parking_times(osmdat, n_props = 10L, prop_min = 0.5, ntrials = 100L)
 }
 \arguments{
 \item{osmdat}{Result of \link{sb_osmdata_extract} function, containing all
@@ -13,12 +13,12 @@ primary data needed for analyses.}
 
 \item{n_props}{Number of park-filling proportions used to esimtate times.}
 
+\item{prop_min}{Minimal proportion of filled parking spaces from which to
+start simulation. Low values close to zero and uninformative, as parking
+spaces are almost always available directly in front of buildings.}
+
 \item{ntrials}{Number of random simulations for each value of \code{n_props} used
 to generate average values.}
-
-\item{added_time_to_park}{Additional minutes added on to the estimate of
-time to park a car in a nearby facility, representing time to travel within
-the facility to a parking space. Value is in minutes.}
 }
 \value{
 A \code{data.frame} of proportions of filled parking spaces and
