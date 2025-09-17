@@ -15,7 +15,7 @@
 #' parking facilities ('to_park' and 'from_park'). all times are in minutes.
 #'
 #' @export
-sb_parking_times <- function (osmdat, n_props = 10L, prop_min = 0.5, ntrials = 100L) {
+sb_parking_times <- function (osmdat, n_props = 10L, prop_min = 0.7, ntrials = 100L) {
 
     requireNamespace ("pbapply", quietly = TRUE)
 
@@ -28,11 +28,13 @@ sb_parking_times <- function (osmdat, n_props = 10L, prop_min = 0.5, ntrials = 1
     prop <- get_prop_sequence (prop_min = prop_min, n_props = n_props)
 
     index <- which (!is.na (net$name) & !net$name %in% osmdat$hw_names & net$np > 0)
+    quantiles <- c (0.5, 0.75, 0.9)
+    nq <- length (quantiles)
     res <- pbapply::pblapply (prop, function (p) {
         res_p <- t (vapply (
             index, function (i) {
                 parking_time_simulate (net, net_walk, emap, emap_rev, prop_full = p, start_edge = i, ntrials = ntrials)
-            }, numeric (2L)
+            }, numeric (2 * nq + 2)
         ))
         # 2 cols for (out with car, back by foot) times
 
@@ -54,7 +56,6 @@ sb_parking_times <- function (osmdat, n_props = 10L, prop_min = 0.5, ntrials = 1
         colMeans (res_p, na.rm = TRUE)
     })
     res <- data.frame (cbind (prop, do.call (rbind, res)))
-    names (res) <- c ("prop", "to", "from", "to_park", "from_park")
 
     return (res)
 }
@@ -346,7 +347,8 @@ parking_time_simulate <- function (net,
                                    emap_rev,
                                    prop_full,
                                    start_edge,
-                                   ntrials) {
+                                   ntrials,
+                                   quantiles = c (0.5, 0.75, 0.9)) {
 
     res <- rcpp_park_search (
         net, emap, emap_rev,
@@ -389,5 +391,10 @@ parking_time_simulate <- function (net,
     d0 <- res$d * m_to_time
     d_walk <- d_walk * m_to_time
 
-    c (mean (d0), mean (d_walk))
+    d0_q <- stats::quantile (d0, probs = quantiles)
+    names (d0_q) <- paste0 ("d0_", gsub ("%$", "", names (d0_q)))
+    dwalk_q <- stats::quantile (d0, probs = quantiles)
+    names (dwalk_q) <- paste0 ("dwalk_", gsub ("%$", "", names (dwalk_q)))
+
+    c (d0_mn = mean (d0), d0_q, dw_mn = mean (d_walk), dwalk_q)
 }

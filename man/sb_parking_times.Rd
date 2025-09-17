@@ -5,7 +5,7 @@
 \title{Esimate times to park cars within superblock, compared with times to park in
 nearby parking facilities and walk back.}
 \usage{
-sb_parking_times(osmdat, n_props = 10L, prop_min = 0.5, ntrials = 100L)
+sb_parking_times(osmdat, n_props = 10L, prop_min = 0.7, ntrials = 100L)
 }
 \arguments{
 \item{osmdat}{Result of \link{sb_osmdata_extract} function, containing all
