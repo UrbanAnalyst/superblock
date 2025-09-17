@@ -24,7 +24,7 @@ sb_parking_times <- function (osmdat, n_props = 20L, ntrials = 100L, added_time_
     prop <- 1 - (log (n_props + 2) - log (seq_len (n_props + 2))) / log (n_props + 2)
     prop <- prop [-c (1, n_props + 2)]
 
-    index <- which (!is.na (net$name) & !net$name %in% osmdat$hw_names)
+    index <- which (!is.na (net$name) & !net$name %in% osmdat$hw_names & net$np > 0)
     res <- pbapply::pblapply (prop, function (p) {
         res_p <- t (vapply (
             index, function (i) {
