@@ -6,9 +6,14 @@
 #' @param n_props Number of park-filling proportions used to esimtate times.
 #' @param ntrials Number of random simulations for each value of `n_props` used
 #' to generate average values.
-#' @aparam added_time_to_park Additional minutes added on to the estimate of
+#' @param added_time_to_park Additional minutes added on to the estimate of
 #' time to park a car in a nearby facility, representing time to travel within
 #' the facility to a parking space. Value is in minutes.
+#' @return A `data.frame` of proportions of filled parking spaces and
+#' corresponding simulated times to (via car) from (walking) nearest available
+#' spaces. Columns are also included for corresponding times to and from nearby
+#' parking facilities ('to_park' and 'from_park'). all times are in minutes.
+#'
 #' @export
 sb_parking_times <- function (osmdat, n_props = 20L, ntrials = 100L, added_time_to_park = 2) {
 
@@ -208,7 +213,8 @@ parking_as_dodgr_net <- function (osmdat) {
     # suppress no visible binding notes:
     key <- value <- name <- object_ <- .vx0 <- .vx1 <-
         edge_ <- d <- highway <- lanes <- osm_id <-
-        num_parking_spaces <- edge_new <- NULL
+        num_parking_spaces <- edge_new <-
+        .vx0_x <- .vx0_y <- .vx1_x <- .vx1_y <- NULL
 
     requireNamespace ("fs")
 

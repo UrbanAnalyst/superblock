@@ -15,6 +15,16 @@ primary data needed for analyses.}
 
 \item{ntrials}{Number of random simulations for each value of \code{n_props} used
 to generate average values.}
+
+\item{added_time_to_park}{Additional minutes added on to the estimate of
+time to park a car in a nearby facility, representing time to travel within
+the facility to a parking space. Value is in minutes.}
+}
+\value{
+A \code{data.frame} of proportions of filled parking spaces and
+corresponding simulated times to (via car) from (walking) nearest available
+spaces. Columns are also included for corresponding times to and from nearby
+parking facilities ('to_park' and 'from_park'). all times are in minutes.
 }
 \description{
 Esimate times to park cars within superblock, compared with times to park in

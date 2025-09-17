@@ -11,7 +11,7 @@ Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
 // rcpp_park_search
-Rcpp::DataFrame rcpp_park_search(const Rcpp::DataFrame graph, const Rcpp::List edge_map_in, const Rcpp::List edge_map_rev_in, const double prop_full, const int start_edge, const size_t ntrials);
+Rcpp::DataFrame rcpp_park_search(const Rcpp::DataFrame graph, const Rcpp::List edge_map_in, const Rcpp::List edge_map_rev_in, const double prop_full, const int start_edge, const int ntrials);
 RcppExport SEXP _superblock_rcpp_park_search(SEXP graphSEXP, SEXP edge_map_inSEXP, SEXP edge_map_rev_inSEXP, SEXP prop_fullSEXP, SEXP start_edgeSEXP, SEXP ntrialsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -21,7 +21,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const Rcpp::List >::type edge_map_rev_in(edge_map_rev_inSEXP);
     Rcpp::traits::input_parameter< const double >::type prop_full(prop_fullSEXP);
     Rcpp::traits::input_parameter< const int >::type start_edge(start_edgeSEXP);
-    Rcpp::traits::input_parameter< const size_t >::type ntrials(ntrialsSEXP);
+    Rcpp::traits::input_parameter< const int >::type ntrials(ntrialsSEXP);
     rcpp_result_gen = Rcpp::wrap(rcpp_park_search(graph, edge_map_in, edge_map_rev_in, prop_full, start_edge, ntrials));
     return rcpp_result_gen;
 END_RCPP
