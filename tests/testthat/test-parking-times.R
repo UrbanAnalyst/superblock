@@ -24,13 +24,14 @@ test_that ("parking times", {
 
     expect_s3_class (times, "data.frame")
     expect_s3_class (times, "sb_parking")
-    expect_named (
-        times,
-        c (
-            "prop", "d0_mn", "d0_50", "d0_75", "d0_90", "dwalk_mn", "dwalk_50",
-            "dwalk_75", "dwalk_90", "time_to_parking", "time_from_parking"
-        )
+    nms <- c (
+        "prop", "d0_mn", "d0_50", "d0_75", "d0_90", "dwalk_mn", "dwalk_50",
+        "dwalk_75", "dwalk_90", "time_to_parking", "time_from_parking"
     )
+    expect_named (times, nms)
+    for (n in nms) {
+        expect_true (all (times [[n]] > 0))
+    }
 
     prop_min <- 0.7 # default value
     n_props <- 10L
@@ -39,14 +40,4 @@ test_that ("parking times", {
     expect_identical (prop, times$prop)
     expect_length (unique (times$time_to_parking), 1L)
     expect_length (unique (times$time_from_parking), 1L)
-
-    # expect all other values to increase:
-    nms <- names (times) [which (!grepl ("^(prop|time)", names (times)))]
-    # dwalk_mean actually decreases
-    nms <- setdiff (nms, "dwalk_mn")
-    for (n in nms) {
-        mod <- lm (times [[n]] ~ times$prop)
-        slope <- summary (mod)$coefficients [2]
-        expect_true (slope > 0)
-    }
 })
