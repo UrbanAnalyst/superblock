@@ -23,7 +23,7 @@ plot.sb_parking <- function (x, ...) {
     ggplot2::theme_set (ggplot2::theme_minimal ())
     ggplot2::ggplot (dat, ggplot2::aes (x = prop, y = time, colour = what)) +
         ggplot2::geom_line (lty = 2) +
-        ggplot2::geom_smooth (method = "loess", se = FALSE) +
+        ggplot2::geom_smooth (method = "loess", formula = "y ~ x", se = FALSE) +
         ggplot2::xlab ("Proportion of parking spaces occupied") +
         ggplot2::ylab ("Time (minutes)") +
         ggplot2::scale_y_log10 () +

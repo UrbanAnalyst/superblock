@@ -40,4 +40,11 @@ test_that ("parking times", {
     expect_identical (prop, times$prop)
     expect_length (unique (times$time_to_parking), 1L)
     expect_length (unique (times$time_from_parking), 1L)
+
+    # Test plot method:
+    pl <- plot (times)
+    expect_s3_class (pl, "ggplot")
+    ld <- ggplot2::layer_data (pl)
+    group_lens <- table (ld$group)
+    expect_true (all (group_lens == length (prop)))
 })
