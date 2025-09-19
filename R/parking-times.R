@@ -21,8 +21,11 @@ sb_parking_times <- function (osmdat, n_props = 10L, prop_min = 0.7, ntrials = 1
 
     prop <- get_prop_sequence (prop_min = prop_min, n_props = n_props)
     res <- cbind (propr = prop, do.call (rbind, lapply (res, colMeans)))
+    res <- data.frame (res)
 
-    return (data.frame (res))
+    class (res) <- append ("sb_parking", class (res))
+
+    return (res)
 }
 
 parking_times_raw_data <- function (osmdat, n_props = 10L, prop_min = 0.7, ntrials = 100L) {

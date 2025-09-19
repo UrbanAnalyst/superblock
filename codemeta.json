@@ -7,7 +7,7 @@
   "codeRepository": "https://github.com/UrbanAnalyst/superblock-ms",
   "issueTracker": "https://github.com/UrbanAnalyst/superblock-ms/issues",
   "license": "https://spdx.org/licenses/GPL-3.0",
-  "version": "0.1.0.079",
+  "version": "0.1.0.080",
   "programmingLanguage": {
     "@type": "ComputerLanguage",
     "name": "R",
@@ -42,6 +42,18 @@
         "url": "https://cran.r-project.org"
       },
       "sameAs": "https://CRAN.R-project.org/package=fs"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "ggplot2",
+      "name": "ggplot2",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=ggplot2"
     },
     {
       "@type": "SoftwareApplication",
@@ -247,7 +259,7 @@
     },
     "SystemRequirements": {}
   },
-  "fileSize": "4391.951KB",
+  "fileSize": "4389.635KB",
   "contIntegration": [
     "https://github.com/UrbanAnalyst/superblock/actions/workflows/R-CMD-check.yaml",
     "https://app.codecov.io/gh/UrbanAnalyst/superblock"
