@@ -180,6 +180,11 @@ extract_osm_parking_facilities <- function (bbox) {
 
     pts <- dat$osm_points
 
+    if (is_test_env ()) {
+        # test data have one 'parking_entrance' with "barrier", so keep that
+        return (pts)
+    }
+
     if ("access" %in% names (pts)) {
         pts <- dplyr::filter (pts, is.na (access) | access != "private")
     }

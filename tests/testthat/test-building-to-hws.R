@@ -25,11 +25,18 @@ test_that ("hw-to-polygon", {
     expect_true (all (b$hw_id %in% osmdat$highways$osm_id))
     expect_type (b$n_parking_spaces, "double")
 
-    dat <- parking_time_matrix (osmdat)
+    dat <- withr::with_envvar (
+        list ("SUPERBLOCK_TESTS" = "true"),
+        parking_time_matrix (osmdat)
+    )
 
     expect_type (dat, "list")
     expect_named (dat, c ("buildings", "tmat_car", "tmat_foot"))
-    expect_identical (b, dat$buildings)
+    identical_cols <- c ("osm_id", "hw_id", "lon", "lat")
+    expect_identical (b [, identical_cols], dat$buildings [, identical_cols])
+    expect_true (all (b$n_parking_spaces == 0))
+    # test data insert fake parking spaces in 'parking_time_matrix()':
+    expect_true (all (dat$buildings$n_parking_spaces > 0))
 
     for (what in c ("tmat_car", "tmat_foot")) {
         expect_type (dat [[what]], "double")

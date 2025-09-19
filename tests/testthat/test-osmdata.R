@@ -69,7 +69,7 @@ test_that ("osm extraction", {
     )
 
     expect_s3_class (osmdat$parking_facilities, "sf")
-    expect_equal (nrow (osmdat$parking_facilities), 0L) # There are none
+    expect_true (nrow (osmdat$parking_facilities) > 0L)
     expect_true (
         all (c ("osm_id", "geometry") %in%
             names (osmdat$parking_facilities))

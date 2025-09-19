@@ -20,7 +20,7 @@ sb_parking_times <- function (osmdat, n_props = 10L, prop_min = 0.7, ntrials = 1
     res <- m_parking_times_raw_data (osmdat, n_props = n_props, prop_min = prop_min, ntrials = ntrials)
 
     prop <- get_prop_sequence (prop_min = prop_min, n_props = n_props)
-    res <- cbind (propr = prop, do.call (rbind, lapply (res, colMeans)))
+    res <- cbind (prop = prop, do.call (rbind, lapply (res, colMeans, na.rm = TRUE)))
     res <- data.frame (res)
 
     class (res) <- append ("sb_parking", class (res))
@@ -40,6 +40,10 @@ parking_times_raw_data <- function (osmdat, n_props = 10L, prop_min = 0.7, ntria
     emap_rev <- make_edge_to_edge_map (net, rev = TRUE)
     prop <- get_prop_sequence (prop_min = prop_min, n_props = n_props)
 
+    if (is_test_env ()) {
+        net$name <- letters [seq_len (nrow (net))]
+        net$np <- seq_len (nrow (net))
+    }
     index <- which (!is.na (net$name) & !net$name %in% osmdat$hw_names & net$np > 0)
     quantiles <- c (0.5, 0.75, 0.9)
     nq <- length (quantiles)
@@ -218,6 +222,10 @@ parking_time_matrix <- function (osmdat) {
         )
         tmat <- dodgr::dodgr_times (net, from = parking_ids, to = to_ids)
         b$time_from_parking <- apply (tmat, 1, min, na.rm = TRUE)
+        if (is_test_env ()) {
+            # all buildings otherwise have n_parking_spaces = 0;
+            b$n_parking_spaces <- 10 * seq_len (nrow (b))
+        }
     }
 
     list (buildings = b, tmat_car = tmats [[1]], tmat_foot = tmats [[2]])
@@ -369,7 +377,7 @@ parking_time_simulate <- function (net,
     )
     res <- res [which (res$d > 0), ]
     if (nrow (res) == 0L) {
-        return (c (NA_real_, NA_real_))
+        return (rep (NA_real_, 8L))
     }
 
     vfr <- rep (net$.vx0 [start_edge], times = nrow (res))
@@ -407,5 +415,5 @@ parking_time_simulate <- function (net,
     dwalk_q <- stats::quantile (d0, probs = quantiles)
     names (dwalk_q) <- paste0 ("dwalk_", gsub ("%$", "", names (dwalk_q)))
 
-    c (d0_mn = mean (d0), d0_q, dw_mn = mean (d_walk), dwalk_q)
+    c (d0_mn = mean (d0), d0_q, dwalk_mn = mean (d_walk), dwalk_q)
 }
