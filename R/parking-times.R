@@ -17,6 +17,16 @@
 #' @export
 sb_parking_times <- function (osmdat, n_props = 10L, prop_min = 0.7, ntrials = 100L) {
 
+    res <- m_parking_times_raw_data (osmdat, n_props = n_props, prop_min = prop_min, ntrials = ntrials)
+
+    prop <- get_prop_sequence (prop_min = prop_min, n_props = n_props)
+    res <- cbind (propr = prop, do.call (rbind, lapply (res, colMeans)))
+
+    return (data.frame (res))
+}
+
+parking_times_raw_data <- function (osmdat, n_props = 10L, prop_min = 0.7, ntrials = 100L) {
+
     requireNamespace ("pbapply", quietly = TRUE)
 
     net <- parking_as_dodgr_net (osmdat)
@@ -51,14 +61,12 @@ sb_parking_times <- function (osmdat, n_props = 10L, prop_min = 0.7, ntrials = 1
         tmat_cols <- c ("time_to_parking", "time_from_parking")
         park_times <- tmats$buildings [index, tmat_cols] / 60
 
-        res_p <- cbind (res_p, park_times)
-
-        colMeans (res_p, na.rm = TRUE)
+        cbind (res_p, park_times)
     })
-    res <- data.frame (cbind (prop, do.call (rbind, res)))
 
     return (res)
 }
+m_parking_times_raw_data <- memoise::memoise (parking_times_raw_data)
 
 get_prop_sequence <- function (prop_min = 0.5, n_props = 20) {
 
