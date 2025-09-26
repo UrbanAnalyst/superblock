@@ -33,7 +33,13 @@ sb_osmdata_extract <- function (bbox, hw_names, outer = TRUE) {
     parking_facilities <- extract_osm_parking_facilities (bbox)
     cli::cli_alert_success ("Extracted data on parking areas.")
 
+    # Extract tree and bicycle parking nodes, but only keep those within 5m of
+    # the internal streeets.
+    node_limit <- 5 # in metres
     nodes <- extract_osm_nodes (bbox)
+    dmat <- sf::st_distance (nodes, dat_hw) # dim = (nodes, hw)
+    dmin <- apply (dmat, 1, min)
+    nodes <- nodes [which (dmin <= node_limit), ]
 
     list (
         bbox = bbox,
