@@ -5,17 +5,9 @@
 #' @noRd
 area_per_resident <- function (osmdat) {
 
-    street <- "Papenburger Straße"
-    housenumber <- 2
     num_residents_floors <- 21
     num_residents_roof <- 2.5
-
-    b <- osmdat$buildings
-
-    i <- which (
-        b$`addr:street` == street & b$`addr:housenumber` == housenumber
-    )
-    area <- sf::st_area (osmdat$buildings [i, ]) # in m^2
+    area <- 181 # m2
 
     num_levels <- as.numeric (b$`building:levels` [i])
     num_roof_levels <- as.numeric (b$`roof:levels` [i])
