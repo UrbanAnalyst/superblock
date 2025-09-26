@@ -33,6 +33,8 @@ sb_osmdata_extract <- function (bbox, hw_names, outer = TRUE) {
     parking_facilities <- extract_osm_parking_facilities (bbox)
     cli::cli_alert_success ("Extracted data on parking areas.")
 
+    nodes <- extract_osm_nodes (bbox)
+
     list (
         bbox = bbox,
         hw_names = hw_names,
@@ -42,6 +44,7 @@ sb_osmdata_extract <- function (bbox, hw_names, outer = TRUE) {
         open_spaces = open_spaces,
         parking_areas = parking_areas,
         parking_facilities = parking_facilities,
+        nodes = nodes,
         dat_sc = dat_hw$dat_sc
     )
 }
@@ -193,4 +196,20 @@ extract_osm_parking_facilities <- function (bbox) {
     }
 
     return (pts)
+}
+
+extract_osm_nodes <- function (bbox) {
+
+    amenity <- natural <- NULL
+
+    dat <- osmdata::opq (bbox) |>
+        osmdata::add_osm_features (list (
+            natural = "tree",
+            amenity = "bicycle_parking"
+        )) |>
+        m_osmdata_sf ()
+
+    dat$osm_points |>
+        dplyr::filter (amenity == "bicycle_parking" | natural == "tree") |>
+        dplyr::select (osm_id, amenity, natural)
 }
