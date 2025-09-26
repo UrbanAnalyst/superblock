@@ -27,4 +27,8 @@ memoise_osmdata_calls <- function (bbox, hw_names) {
     parking_facilities <- httptest2::with_mock_dir ("osm-parking-facilities", {
         extract_osm_parking_facilities (bbox)
     })
+
+    parking_facilities <- httptest2::with_mock_dir ("osm-nodes", {
+        extract_osm_nodes (bbox)
+    })
 }

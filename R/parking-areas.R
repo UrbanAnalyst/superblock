@@ -118,9 +118,15 @@ parking_structure <- function (hws) {
     return (hws)
 }
 
-reduce_parking_for_trees <- function (hws, osmdat) {
+reduce_parking_for_trees <- function (hws, osmdat, buffer = 5) {
 
     nodes <- osmdat$nodes
+    # First reduce nodes to only those within buffer distance of hws:
+    dmat <- sf::st_distance (nodes, hws)
+    dmin <- apply (dmat, 1, min)
+    nodes <- nodes [which (dmin <= buffer), ]
+
+    # Then map nodes to hws:
     dmat <- sf::st_distance (nodes, hws)
     index <- table (apply (dmat, 1, which.min))
     index <- data.frame (
@@ -138,6 +144,7 @@ reduce_parking_for_trees <- function (hws, osmdat) {
         this_dir <- hws [[paste0 ("parking_", dir)]]
         this_red <- reductions [match (this_dir, angles)]
         this_red [is.na (this_red)] <- 0
+        this_red [which (hws$num_parking_spaces == 0)] <- 0
 
         hws$num_parking_spaces <- hws$num_parking_spaces -
             this_red * node_counts / 2
