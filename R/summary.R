@@ -13,6 +13,7 @@ sb_summary <- function (osmdat, hw_polygons = NULL, add_parking_osm_ids = NULL) 
     }
 
     hws <- car_parking_areas (osmdat, add_parking_osm_ids = add_parking_osm_ids)
+    car_parks_per_res <- sb_car_spaces_per_resident (osmdat)
 
     a_tot <- as.numeric (sf::st_area (osmdat$bounding_poly) / 10000)
     a_tot_f <- format (a_tot, digits = 3)
@@ -28,6 +29,7 @@ sb_summary <- function (osmdat, hw_polygons = NULL, add_parking_osm_ids = NULL) 
     a_parking_prop <- format (100 * a_parking / a_hw, digits = 3)
     a_road_prop <- format (100 * a_road / a_hw, digits = 3)
     a_no_cars <- format (100 * (a_hw - a_road - a_parking) / a_hw, digits = 3)
+    a_carpark_per_res <- format (100 * car_parks_per_res, digits = 2)
 
     a_public <- a_open + a_hw - a_road - a_parking
     a_public_prop <- format (100 * a_public / a_tot, digits = 3)
@@ -45,6 +47,8 @@ sb_summary <- function (osmdat, hw_polygons = NULL, add_parking_osm_ids = NULL) 
     cli::cli_li ("{a_parking_prop}% is for parked cars, and")
     cli::cli_li ("{a_no_cars}% remains for everybody else.")
     cli::cli_end (ul2)
+    cli::cli_li ("There are street parking spaces for {a_carpark_per_res}% of all residents.")
+    cli::cli_li ("So {a_carpark_per_res}% of residents occupy {a_parking_prop}% of all space")
     cli::cli_text ()
     cli::cli_li ("Total proportion of public space: {a_public_prop}")
     cli::cli_li ("Total proportion of public space as superblock: {a_public_prop_adj}")

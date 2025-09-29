@@ -10,6 +10,8 @@
         * 57.9% is for car roads
         * 116% is for parked cars, and
         * -73.7% remains for everybody else.
+      * There are street parking spaces for NaN% of all residents.
+      * So NaN% of residents occupy 116% of all space
       
       * Total proportion of public space: -3.37
       * Total proportion of public space as superblock: 4.57
