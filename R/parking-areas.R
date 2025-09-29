@@ -7,6 +7,7 @@ car_parking_areas <- function (osmdat, add_parking_osm_ids = NULL) {
     hws$lanes <- as.numeric (hws$lanes)
     hws$road_area <- sf::st_length (hws) * units::set_units (hws$lanes * lane_width)
     hws <- parking_structure (hws)
+    hws <- reduce_parking_for_trees (hws, osmdat)
 
     if (!is.null (add_parking_osm_ids)) {
         index <- which (as.numeric (hws$parking_area) > 0)
@@ -25,8 +26,9 @@ parking_structure <- function (hws) {
 
     # Depth of parking spaces out into the street
     depths <- c (3, 4, 5) # (parallel, diagonal, perpendicular)
+    angles <- c ("parallel", "diagonal", "perpenducular")
     # And equivalent lengths along the street
-    lengths <- c (5, 3, 3)
+    lengths <- c (5, 4, 3)
 
     parking <- sf::st_drop_geometry (hws [, grep ("parking", names (hws))])
     hws <- hws [, which (!grepl ("parking", names (hws)))]
@@ -48,15 +50,16 @@ parking_structure <- function (hws) {
         })
         conditions <- do.call (cbind, conditions)
 
-        parking_space <- rep (0, nrow (parking))
+        parking_depth <- parking_length <- rep (0, nrow (parking))
         for (i in 2:4) {
-            parking_space [which (conditions [, i])] <- depths [i - 1L]
+            parking_depth [which (conditions [, i])] <- depths [i - 1L]
+            parking_length [which (conditions [, i])] <- lengths [i - 1L]
         }
 
         # And set any "no" or "false" flags to no parking space:
         parking_prohibited <- conditions [, 1]
 
-        return (cbind (parking_space, parking_prohibited))
+        return (cbind (parking_depth, parking_length, parking_prohibited))
     }
 
     dirs <- c ("left", "right", "both")
@@ -71,10 +74,21 @@ parking_structure <- function (hws) {
     hws$parking_prohibited [parking_prohibited [[2]]] <- "right"
     hws$parking_prohibited [parking_prohibited [[3]]] <- "both"
 
-    parking_sides <- parking [[1]] [, 1] + parking [[2]] [, 1]
+    parking_sides <- parking [[1]] [, 1] + parking [[2]] [, 1] # [, 1] == depth
     parking_both <- parking [[3]] [, 1] * 2
-    parking_space <- apply (cbind (parking_sides, parking_both), 1, max)
-    hws$parking_area <- sf::st_length (hws) * units::set_units (parking_space, "m")
+    parking_depth <- apply (cbind (parking_sides, parking_both), 1, max)
+    hws$parking_area <- sf::st_length (hws) * units::set_units (parking_depth, "m")
+
+    # Add details of parking on each side:
+    hws$parking_left <- hws$parking_right <- NA_character_
+    for (i in seq_along (depths)) {
+        index <- which (parking [[1]] [, 1] == depths [i])
+        hws$parking_left [index] <- angles [i]
+        index <- which (parking [[2]] [, 1] == depths [i])
+        hws$parking_right [index] <- angles [i]
+        index <- which (parking [[3]] [, 1] == depths [i])
+        hws$parking_left [index] <- hws$parking_right [index] <- angles [i]
+    }
 
     # Then estimate number of parking spaces:
     hw_lens <- as.numeric (sf::st_length (hws))
@@ -82,7 +96,7 @@ parking_structure <- function (hws) {
         res <- lapply (
             parking,
             function (p) {
-                index <- which (p [, 1] > 0 & p [, 1] %% l == 0)
+                index <- which (p [, 2] > 0 & p [, 2] %% l == 0) # [, 2] == length
                 index_ids <- match (names (index), hws$osm_id)
                 n <- floor (hw_lens [index_ids] / l)
                 cbind (n, names (index))
@@ -101,6 +115,42 @@ parking_structure <- function (hws) {
 
     hws$num_parking_spaces <- rep (0L, nrow (hws))
     hws$num_parking_spaces [match (n_spaces$osm_id, hws$osm_id)] <- n_spaces$n
+
+    return (hws)
+}
+
+reduce_parking_for_trees <- function (hws, osmdat, buffer = 5) {
+
+    nodes <- osmdat$nodes
+    # First reduce nodes to only those within buffer distance of hws:
+    dmat <- sf::st_distance (nodes, hws)
+    dmin <- apply (dmat, 1, min)
+    nodes <- nodes [which (dmin <= buffer), ]
+
+    # Then map nodes to hws:
+    dmat <- sf::st_distance (nodes, hws)
+    index <- table (apply (dmat, 1, which.min))
+    index <- data.frame (
+        hw_num = as.integer (names (index)),
+        count = as.integer (index)
+    )
+    node_counts <- rep (0, nrow (hws))
+    node_counts [index$hw_num] <- index$count
+
+    angles <- c ("parallel", "diagonal", "perpenducular")
+    reductions <- c (1, 2, 3) # reduction in parking spaces
+
+    # Then presume nodes are evenly divided on both sides of each highway:
+    for (dir in c ("left", "right")) {
+        this_dir <- hws [[paste0 ("parking_", dir)]]
+        this_red <- reductions [match (this_dir, angles)]
+        this_red [is.na (this_red)] <- 0
+        this_red [which (hws$num_parking_spaces == 0)] <- 0
+
+        hws$num_parking_spaces <- hws$num_parking_spaces -
+            this_red * node_counts / 2
+    }
+    hws$num_parking_spaces <- floor (hws$num_parking_spaces)
 
     return (hws)
 }
