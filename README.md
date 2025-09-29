@@ -36,8 +36,8 @@ sb_summary (osmdat)
 #>   • 32.5% is for car roads
 #>   • 39.9% is for parked cars, and
 #>   • 27.6% remains for everybody else.
-#> • There are street parking spaces for 7.8% of all residents.
-#> • So 7.8% of residents occupy 39.9% of all space
+#> • There are street parking spaces for 8.6% of all residents.
+#> • So 8.6% of residents occupy 39.9% of all space
 #> 
 #> • Total proportion of public space: 11.7
 #> • Total proportion of public space as superblock: 23.1
