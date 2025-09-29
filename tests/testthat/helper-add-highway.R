@@ -33,8 +33,9 @@ helper_extra_highway <- function (osmdat) {
         character (1L)
     )
 
+    osm_id <- make_id ()
     hw <- sf::st_sf (
-        osm_id = make_id (),
+        osm_id = osm_id,
         name = "name",
         highway = "residential",
         lanes = "1",
@@ -42,6 +43,7 @@ helper_extra_highway <- function (osmdat) {
         "parking:right:orientation" = "diagonal",
         geometry = hw
     )
+    rownames (hw) <- osm_id
     osmdat$highways <- dplyr::bind_rows (osmdat$highways, hw)
 
     return (osmdat)
