@@ -7,6 +7,7 @@
 #' average values from all other ways which do have parking specified.
 #' @export
 sb_summary <- function (osmdat, hw_polygons = NULL, add_parking_osm_ids = NULL) {
+
     if (is.null (hw_polygons)) {
         hw_polygons <- hws_to_polygons (osmdat)
     }

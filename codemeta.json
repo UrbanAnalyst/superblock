@@ -7,7 +7,7 @@
   "codeRepository": "https://github.com/UrbanAnalyst/superblock-ms",
   "issueTracker": "https://github.com/UrbanAnalyst/superblock-ms/issues",
   "license": "https://spdx.org/licenses/GPL-3.0",
-  "version": "0.1.0.102",
+  "version": "0.1.0.103",
   "programmingLanguage": {
     "@type": "ComputerLanguage",
     "name": "R",
@@ -259,7 +259,7 @@
     },
     "SystemRequirements": {}
   },
-  "fileSize": "4389.635KB",
+  "fileSize": "4436.035KB",
   "contIntegration": [
     "https://github.com/UrbanAnalyst/superblock/actions/workflows/R-CMD-check.yaml",
     "https://app.codecov.io/gh/UrbanAnalyst/superblock"

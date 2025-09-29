@@ -1,3 +1,27 @@
+#' Estimate number of car spaces per resident
+#'
+#' @param osmdat Object returned from \link{sb_osmdata_extract}.
+#' @return An estimate of numbers of parking spaces per resident.
+#' @export
+sb_car_spaces_per_resident <- function (osmdat) {
+
+    a_per_res <- area_per_resident (osmdat)
+    a_per_res_floor <- 10 * floor (mean (a_per_res$floor) / 10)
+    a_per_res_roof <- 10 * floor (mean (a_per_res$roof) / 10)
+
+    a_building <- building_areas (osmdat)
+    area_floor <- sum (a_building$floor)
+    area_roof <- sum (a_building$roof)
+
+    num_res_floor <- as.numeric (area_floor) / a_per_res_floor
+    num_res_roof <- as.numeric (area_roof) / a_per_res_roof
+    num_res <- num_res_floor + num_res_roof
+
+    p <- car_parking_areas (osmdat)
+    num_parking_spaces <- sum (p$num_parking_spaces)
+    num_parking_spaces / num_res
+}
+
 #' Estimate floor and roof area per resident.
 #'
 #' Uses example building with known numbers of residents, and which is typical
