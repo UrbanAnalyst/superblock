@@ -34,10 +34,10 @@ sb_summary (osmdat)
 #> • Proportion open space: 7.36%
 #> • Proportion roads: 15.7%, of which:
 #>   • 32.5% is for car roads
-#>   • 39.7% is for parked cars, and
-#>   • 27.7% remains for everybody else.
+#>   • 39.9% is for parked cars, and
+#>   • 27.6% remains for everybody else.
 #> • There are street parking spaces for 7.8% of all residents.
-#> • So 7.8% of residents occupy 39.7% of all space
+#> • So 7.8% of residents occupy 39.9% of all space
 #> 
 #> • Total proportion of public space: 11.7
 #> • Total proportion of public space as superblock: 23.1
@@ -54,12 +54,12 @@ results are compared to equivalent times to drive to the nearest large
 parking facility (“garage” in the graph below), to park a car, and then
 walk back to the place of residence.
 
-<img src="man/figures/README-parking-times-1.png" width="672" />
-
 ``` r
 times <- sb_parking_times (osmdat)
 plot (times)
 ```
+
+<img src="man/figures/README-parking-times-1.png" width="672" />
 
 The results shows how long it takes to find a parking space for an
 average attempt (“park(50%)”), for one out of every four attempts
