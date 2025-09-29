@@ -209,7 +209,7 @@ extract_osm_parking_facilities <- function (bbox) {
 
 extract_osm_nodes <- function (bbox) {
 
-    amenity <- natural <- NULL
+    amenity <- natural <- osm_id <- NULL
 
     dat <- osmdata::opq (bbox) |>
         osmdata::add_osm_features (list (
