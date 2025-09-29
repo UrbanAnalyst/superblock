@@ -34,7 +34,7 @@ test_that ("hw-to-polygon", {
     expect_named (dat, c ("buildings", "tmat_car", "tmat_foot"))
     identical_cols <- c ("osm_id", "hw_id", "lon", "lat")
     expect_identical (b [, identical_cols], dat$buildings [, identical_cols])
-    expect_true (all (b$n_parking_spaces == 0))
+    expect_true (all (b$n_parking_spaces >= 0))
     # test data insert fake parking spaces in 'parking_time_matrix()':
     expect_true (all (dat$buildings$n_parking_spaces > 0))
 

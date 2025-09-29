@@ -30,7 +30,7 @@ parking_structure <- function (hws) {
     # And equivalent lengths along the street
     lengths <- c (5, 4, 3)
 
-    parking <- sf::st_drop_geometry (hws [, grep ("parking", names (hws))])
+    parking <- sf::st_drop_geometry (hws [, grep ("parking", names (hws)), drop = FALSE])
     hws <- hws [, which (!grepl ("parking", names (hws)))]
 
     parking <-
@@ -96,10 +96,11 @@ parking_structure <- function (hws) {
         res <- lapply (
             parking,
             function (p) {
-                index <- which (p [, 2] > 0 & p [, 2] %% l == 0) # [, 2] == length
-                index_ids <- match (names (index), hws$osm_id)
+                p2 <- p [, 2, drop = FALSE]
+                index <- which (p2 > 0 && p2 %% l == 0)
+                index_ids <- match (rownames (p2) [index], hws$osm_id)
                 n <- floor (hw_lens [index_ids] / l)
-                cbind (n, names (index))
+                cbind (n, rownames (p2) [index])
             }
         )
         do.call (rbind, res)

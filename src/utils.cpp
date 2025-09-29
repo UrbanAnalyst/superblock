@@ -3,7 +3,7 @@
 #include <Rcpp.h>
 
 double utils::choose(size_t n, size_t k) {
-    if (k < 0 || k > n) {
+    if (k > n) {
         return 0.0;
     }
     if (k == 0 || k == n) {
@@ -15,8 +15,11 @@ double utils::choose(size_t n, size_t k) {
     }
 
     double result = 1.0;
+    const double k_dbl = static_cast<double>(k);
+    const double n_dbl = static_cast<double>(n);
     for (size_t i = 1; i <= k; i++) {
-        result = result * (n - k + i) / static_cast<double>(i);
+        const double i_dbl = static_cast<double>(i);
+        result = result * (n_dbl - k_dbl + i_dbl) / i_dbl;
     }
 
     return result;
@@ -49,7 +52,7 @@ double utils::expected_min_d(size_t d, size_t n) {
 
         double p = prob_all_n_lt_sampled - prob_all_n_sampled;
 
-        val = val + i * p;
+        val = val + static_cast<double>(i) * p;
     }
 
     return val;

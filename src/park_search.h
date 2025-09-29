@@ -24,7 +24,7 @@ void makeEdgeMaps (
     EdgeMapType &edgeMap,
     EdgeMapType &edgeMapRev);
 
-std::vector <size_t> randomOrder (size_t ntotal, size_t n);
+std::vector <size_t> randomOrder (int ntotal, size_t n);
 
 std::vector <double> fillParkingSpaces (std::vector <int> num_spaces, double prop_full);
 
@@ -51,4 +51,4 @@ Rcpp::DataFrame rcpp_park_search (const Rcpp::DataFrame graph,
         const Rcpp::List edge_map_rev_in,
         const double prop_full,
         const int start_edge,
-        const size_t ntrials);
+        const int ntrials);
