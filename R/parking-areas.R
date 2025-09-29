@@ -50,15 +50,16 @@ parking_structure <- function (hws) {
         })
         conditions <- do.call (cbind, conditions)
 
-        parking_space <- rep (0, nrow (parking))
+        parking_depth <- parking_length <- rep (0, nrow (parking))
         for (i in 2:4) {
-            parking_space [which (conditions [, i])] <- depths [i - 1L]
+            parking_depth [which (conditions [, i])] <- depths [i - 1L]
+            parking_length [which (conditions [, i])] <- lengths [i - 1L]
         }
 
         # And set any "no" or "false" flags to no parking space:
         parking_prohibited <- conditions [, 1]
 
-        return (cbind (parking_space, parking_prohibited))
+        return (cbind (parking_depth, parking_length, parking_prohibited))
     }
 
     dirs <- c ("left", "right", "both")
@@ -73,10 +74,10 @@ parking_structure <- function (hws) {
     hws$parking_prohibited [parking_prohibited [[2]]] <- "right"
     hws$parking_prohibited [parking_prohibited [[3]]] <- "both"
 
-    parking_sides <- parking [[1]] [, 1] + parking [[2]] [, 1]
+    parking_sides <- parking [[1]] [, 1] + parking [[2]] [, 1] # [, 1] == depth
     parking_both <- parking [[3]] [, 1] * 2
-    parking_space <- apply (cbind (parking_sides, parking_both), 1, max)
-    hws$parking_area <- sf::st_length (hws) * units::set_units (parking_space, "m")
+    parking_depth <- apply (cbind (parking_sides, parking_both), 1, max)
+    hws$parking_area <- sf::st_length (hws) * units::set_units (parking_depth, "m")
 
     # Add details of parking on each side:
     hws$parking_left <- hws$parking_right <- NA_character_
@@ -95,7 +96,7 @@ parking_structure <- function (hws) {
         res <- lapply (
             parking,
             function (p) {
-                index <- which (p [, 1] > 0 & p [, 1] %% l == 0)
+                index <- which (p [, 2] > 0 & p [, 2] %% l == 0) # [, 2] == length
                 index_ids <- match (names (index), hws$osm_id)
                 n <- floor (hw_lens [index_ids] / l)
                 cbind (n, names (index))
