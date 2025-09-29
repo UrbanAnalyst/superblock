@@ -34,12 +34,41 @@ sb_summary (osmdat)
 #> • Proportion open space: 7.36%
 #> • Proportion roads: 15.7%, of which:
 #>   • 32.5% is for car roads
-#>   • 39.9% is for parked cars, and
-#>   • 27.6% remains for everybody else.
+#>   • 39.7% is for parked cars, and
+#>   • 27.7% remains for everybody else.
 #> • There are street parking spaces for 7.8% of all residents.
-#> • So 7.8% of residents occupy 39.9% of all space
+#> • So 7.8% of residents occupy 39.7% of all space
 #> 
 #> • Total proportion of public space: 11.7
 #> • Total proportion of public space as superblock: 23.1
 #> • Increase in public space as superblock: 97%
 ```
+
+------------------------------------------------------------------------
+
+### Analysis of parking times
+
+There is also a function to estimate how long it takes to find car park
+as a function of the proportion of available car parking spaces. The
+results are compared to equivalent times to drive to the nearest large
+parking facility (“garage” in the graph below), to park a car, and then
+walk back to the place of residence.
+
+<img src="man/figures/README-parking-times-1.png" width="672" />
+
+``` r
+times <- sb_parking_times (osmdat)
+plot (times)
+```
+
+The results shows how long it takes to find a parking space for an
+average attempt (“park(50%)”), for one out of every four attempts
+(“park(75%)”), and for one out of every ten attempts (“park(90%)”).
+Above around 97-98% occupancy, which is the general state most nights,
+an “average” attempt may still take under 5 minutes, yet one out of four
+times will take 10 minutes or more, and one out of ten times it will
+take more than half an hour. The horizontal lines shows the time it
+would take on average for all residents of the area to drive directly to
+a nearby large parking facility (“garage”), park, and walk back. Beyond
+around 95% occupancy, it is always quicker to park in a garage and walk
+back.
