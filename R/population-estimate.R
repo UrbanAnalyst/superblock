@@ -9,33 +9,45 @@ area_per_resident <- function (osmdat) {
     num_residents_roof <- 2.5
     area <- 181 # m2
 
-    num_levels <- as.numeric (b$`building:levels` [i])
-    num_roof_levels <- as.numeric (b$`roof:levels` [i])
-    num_roof_levels <- ifelse (is.na (num_roof_levels), 0, num_roof_levels)
+    b <- filter_residential_buildings (osmdat$buildings)
+    num_levels <- as.numeric (b$`building:levels`)
+    num_roof_levels <- as.numeric (b$`roof:levels`)
+
+    # Replace missing values with averages:
+    num_levels_mn <- mean (num_levels, na.rm = TRUE)
+    num_roof_levels_mn <- mean (num_roof_levels, na.rm = TRUE)
+    num_levels <- ifelse (is.na (num_levels), num_levels_mn, num_levels)
+    num_roof_levels <- ifelse (is.na (num_roof_levels), num_roof_levels_mn, num_roof_levels)
+
     a_per_res_floors <- area * num_levels / num_residents_floors
-    a_per_res_floors <- 10 * floor (a_per_res_floors / 10)
     # This is artifically inflated, because roof areas are always smaller:
     a_per_res_roof <- area * num_roof_levels / num_residents_roof
-    a_per_res_roof <- 10 * floor (a_per_res_roof / 10)
 
-    c (floor = a_per_res_floors, roof = a_per_res_roof)
+    data.frame (osm_id = b$osm_id, floor = a_per_res_floors, roof = a_per_res_roof)
 }
 
-building_areas <- function (osmdat) {
+exclude_ground_floor <- c ("civic", "office", "retail", "supermarket")
+
+filter_residential_buildings <- function (b) {
 
     exclude <- c ("carport", "garage", "garages", "school", "shed", "yes")
-    b <- osmdat$buildings |>
-        dplyr::filter (!building %in% exclude) |>
+    b <- dplyr::filter (b, !building %in% exclude) |>
         dplyr::filter (!is.na (`addr:street`) & !is.na (`addr:housenumber`))
 
-    exclude_ground_floor <- c ("civic", "office", "retail", "supermarket")
     num_levels <- as.numeric (b$`building:levels`)
     index <- which (b$building %in% exclude_ground_floor & num_levels == 1)
     if (length (index > 0)) {
         b <- b [-index, ]
-        num_levels <- as.numeric (b$`building:levels`)
-        index <- which (b$building %in% exclude_ground_floor)
     }
+    return (b)
+}
+
+building_areas <- function (osmdat) {
+
+    b <- filter_residential_buildings (osmdat$buildings)
+
+    num_levels <- as.numeric (b$`building:levels`)
+    index <- which (b$building %in% exclude_ground_floor)
     num_levels [index] <- num_levels [index] - 1
     num_roof_levels <- as.numeric (b$`roof:levels`)
 
@@ -47,5 +59,5 @@ building_areas <- function (osmdat) {
     area_levels <- areas * num_levels
     area_roofs <- areas * num_roof_levels
 
-    c (floor = sum (area_levels), roof = sum (area_roofs))
+    data.frame (osm_id = b$osm_id, floor = area_levels, roof = area_roofs)
 }
