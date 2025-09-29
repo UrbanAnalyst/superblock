@@ -26,16 +26,16 @@ void parksearch::makeEdgeMaps (
     }
 }
 
-std::vector <size_t> parksearch::randomOrder (size_t ntotal, size_t n) {
+std::vector <size_t> parksearch::randomOrder (int ntotal, size_t n) {
 
     std::vector <double> xrand = Rcpp::as<std::vector<double>> (Rcpp::runif (ntotal));
 
-    std::vector <size_t> indices(ntotal);
+    std::vector <size_t> indices(static_cast<size_t>(ntotal));
     std::iota(indices.begin(), indices.end(), 0);
     std::sort(indices.begin(), indices.end(),
               [&xrand](size_t i, size_t j) { return xrand[i] < xrand[j]; });
 
-    std::vector <size_t> res (indices.begin(), indices.begin() + n);
+    std::vector <size_t> res (indices.begin(), indices.begin() + static_cast<long>(n));
 
     return res;
 }
@@ -45,12 +45,13 @@ std::vector <double> parksearch::fillParkingSpaces (std::vector <int> num_spaces
     const size_t n = num_spaces.size();
     std::vector <double> p_empty (n, 0.0);
 
-    size_t ntotal = 0;
+    int ntotal = 0;
     for (auto i: num_spaces) {
         ntotal += i;
     }
+    const size_t ntotal_t = static_cast<size_t>(ntotal);
     std::vector <size_t> allSpaces;
-    allSpaces.reserve(ntotal);
+    allSpaces.reserve(ntotal_t);
 
     for (size_t i = 0; i < n; i++) {
         for (auto j = 0; j < num_spaces [i]; j++) {
@@ -58,17 +59,19 @@ std::vector <double> parksearch::fillParkingSpaces (std::vector <int> num_spaces
         }
     }
 
-    const size_t nfull = floor(prop_full * ntotal);
+    const size_t nfull = static_cast<size_t>(floor(prop_full * ntotal));
     std::vector <size_t> index = parksearch::randomOrder(ntotal, nfull);
 
-    std::vector <size_t> fullSpaces (ntotal, 0L);
+    std::vector <size_t> fullSpaces (ntotal_t, 0L);
     for (auto i: index) {
         fullSpaces[allSpaces[i]]++;
     }
 
-    for (int i = 0; i < n; i++) {
+    for (size_t i = 0; i < n; i++) {
         if (num_spaces [i] > 0) {
-            p_empty [i] = 1 - fullSpaces [i] / static_cast<double>(num_spaces [i]);
+            double ns_i = static_cast<double>(num_spaces[i]);
+            double fs_i = static_cast<double>(fullSpaces[i]);
+            p_empty [i] = 1.0 - fs_i / ns_i;
         }
     }
 
@@ -119,15 +122,15 @@ std::vector<double> parksearch::oneParkSearch (
         for (auto s: edgeSet) {
             if (nvisits [s] < nextVisits) {
                 nextVisits = nvisits [s];
-                next_i = s;
+                next_i = static_cast<int>(s);
             }
         }
 
         if (next_i > -1) {
-            i = next_i;
+            i = static_cast<size_t>(next_i);
         }
         if (second_edge < 0) {
-            second_edge = i;
+            second_edge = static_cast<int>(i);
         }
     }
 
@@ -152,7 +155,8 @@ void parksearch::fill_d_to_empty (
 
     for (size_t i = 0; i < nedges; i++) {
         if (num_spaces [i] > 0) {
-            double dprop = utils::expected_min_d (num_spaces [i], floor(num_spaces[i] * prop_full));
+            const size_t n_exp = static_cast<size_t>(floor(num_spaces[i] * prop_full));
+            double dprop = utils::expected_min_d (static_cast<size_t>(num_spaces [i]), n_exp);
             d_to_empty[i] = dist[i] * dprop / num_spaces[i];
         }
     }
@@ -182,7 +186,7 @@ Rcpp::DataFrame rcpp_park_search (const Rcpp::DataFrame graph,
     Rcpp::IntegerVector edge (ntrials), edge2 (ntrials);
     Rcpp::NumericVector d (ntrials);
 
-    for (int n = 0; n < ntrials; n++) {
+    for (size_t n = 0; n < static_cast<size_t>(ntrials); n++) {
 
         std::vector <double> p_empty = parksearch::fillParkingSpaces (num_spaces, prop_full);
 
@@ -190,10 +194,12 @@ Rcpp::DataFrame rcpp_park_search (const Rcpp::DataFrame graph,
         parksearch::fill_d_to_empty(num_spaces, dist, d_to_empty, prop_full);
 
         std::vector<double> res = parksearch::oneParkSearch (
-            edgeMap, edgeMapRev, dist, d_to_empty, p_empty, nedges, start_edge);
+            edgeMap, edgeMapRev, dist, d_to_empty, p_empty, nedges,
+            static_cast<size_t>(start_edge)
+        );
 
-        edge(n) = res[0] + 1L; // Conver back to 1-based R indexing
-        edge2(n) = res[1];
+        edge(n) = static_cast<int>(round(res[0])) + 1L; // Conver back to 1-based R indexing
+        edge2(n) = static_cast<int>(round(res[1]));
         if (edge2(n) > 0) { edge2(n)++; }
         d(n) = res[2];
     }
