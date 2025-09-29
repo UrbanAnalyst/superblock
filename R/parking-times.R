@@ -239,7 +239,7 @@ parking_as_dodgr_net <- function (osmdat) {
         num_parking_spaces <- edge_new <-
         .vx0_x <- .vx0_y <- .vx1_x <- .vx1_y <- NULL
 
-    requireNamespace ("fs")
+    requireNamespace ("fs", quietly = TRUE)
 
     net <- dodgr::weight_streetnet (
         osmdat$dat_sc,

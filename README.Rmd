@@ -50,3 +50,36 @@ the area is converted to a superblock:
 ```{r sb-summary}
 sb_summary (osmdat)
 ```
+
+
+---
+
+### Analysis of parking times
+
+There is also a function to estimate how long it takes to find car park as a
+function of the proportion of available car parking spaces. The results are
+compared to equivalent times to drive to the nearest large parking facility
+("garage" in the graph below), to park a car, and then walk back to the place
+of residence.
+
+```{r parking-times, echo = FALSE, warn = FALSE}
+times <- sb_parking_times (osmdat, ntrials = 10, n_props = 20, prop_min = 0.7)
+plot (times)
+```
+
+
+```{r parking-times-fakey, eval = FALSE}
+times <- sb_parking_times (osmdat)
+plot (times)
+```
+
+The results shows how long it takes to find a parking space for
+an average attempt ("park(50%)"), for one out of every four
+attempts ("park(75%)"), and for one out of every ten attempts
+("park(90%)"). Above around 97-98% occupancy, which is the general state most
+nights, an "average" attempt may still take under 5 minutes, yet one out of
+four times will take 10 minutes or more, and one out of ten times it will take
+more than half an hour. The horizontal lines shows the time it would take on
+average for all residents of the area to drive directly to a nearby large
+parking facility ("garage"), park, and walk back. Beyond around 95% occupancy,
+it is always quicker to park in a garage and walk back.
