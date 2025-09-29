@@ -5,33 +5,31 @@
 #' @export
 sb_car_spaces_per_resident <- function (osmdat) {
 
-    a_per_res <- area_per_resident (osmdat)
-    a_per_res_floor <- 10 * floor (mean (a_per_res$floor) / 10)
-    a_per_res_roof <- 10 * floor (mean (a_per_res$roof) / 10)
-
-    a_building <- building_areas (osmdat)
-    area_floor <- sum (a_building$floor)
-    area_roof <- sum (a_building$roof)
-
-    num_res_floor <- as.numeric (area_floor) / a_per_res_floor
-    num_res_roof <- as.numeric (area_roof) / a_per_res_roof
-    num_res <- num_res_floor + num_res_roof
+    num_res <- estimate_num_residents (osmdat)
+    num_res_tot <- sum (num_res$floor) + sum (num_res$roof)
 
     p <- car_parking_areas (osmdat)
     num_parking_spaces <- sum (p$num_parking_spaces)
-    num_parking_spaces / num_res
+    num_parking_spaces / num_res_tot
 }
 
-#' Estimate floor and roof area per resident.
+#' Estimate numbers of residents in floor and roof levels of buildings.
 #'
 #' Uses example building with known numbers of residents, and which is typical
 #' of the neighbourhood.
 #' @noRd
-area_per_resident <- function (osmdat) {
+estimate_num_residents <- function (osmdat) {
 
-    num_residents_floors <- 21
-    num_residents_roof <- 2.5
-    area <- 181 # m2
+    requireNamespace ("jsonlite", quietly = TRUE)
+
+    f <- system.file ("extdata", "population.json", package = "superblock")
+    if (!file.exists (f)) {
+        cli::cli_abort ("population estimates not bound at {f}")
+    }
+
+    pop <- jsonlite::read_json (f, simplify = TRUE)$population
+    m2_per_res_floor <- mean (pop$area * pop$num_levels / pop$residents_floors)
+    m2_per_res_roof <- mean (pop$area * pop$num_levels_roof / pop$residents_roof)
 
     b <- filter_residential_buildings (osmdat$buildings)
     num_levels <- as.numeric (b$`building:levels`)
@@ -47,11 +45,11 @@ area_per_resident <- function (osmdat) {
     num_levels <- ifelse (is.na (num_levels), num_levels_mn, num_levels)
     num_roof_levels <- ifelse (is.na (num_roof_levels), num_roof_levels_mn, num_roof_levels)
 
-    a_per_res_floors <- area * num_levels / num_residents_floors
-    # This is artifically inflated, because roof areas are always smaller:
-    a_per_res_roof <- area * num_roof_levels / num_residents_roof
+    building_areas <- as.numeric (sf::st_area (b))
+    num_res_floor <- building_areas * num_levels / m2_per_res_floor
+    num_res_roof <- building_areas * num_roof_levels / m2_per_res_roof
 
-    data.frame (osm_id = b$osm_id, floor = a_per_res_floors, roof = a_per_res_roof)
+    data.frame (osm_id = b$osm_id, floor = num_res_floor, roof = num_res_roof)
 }
 
 exclude_ground_floor <- c ("civic", "office", "retail", "supermarket")

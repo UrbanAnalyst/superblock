@@ -1,0 +1,18 @@
+{
+    "population": [
+        {
+            "area": 181,
+            "residents_floors": 20,
+            "residents_roof": 2.5,
+            "num_levels": 4,
+            "num_levels_roof": 1
+        },
+        {
+            "area": 182,
+            "residents_floors": 22,
+            "residents_roof": 4,
+            "num_levels": 4,
+            "num_levels_roof": 1
+        }
+    ]
+}
