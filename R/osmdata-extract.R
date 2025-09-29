@@ -87,7 +87,7 @@ extract_osm_highways <- function (bbox, bounding_poly) {
     nms <- names (hws) [which (!names (hws) == "geometry")]
     has_data <- vapply (nms, function (n) any (!is.na (hws [[n]])), logical (1L))
     has_data <- c (which (has_data), which (nms == "geometry"))
-    hws [, has_data]
+    hws <- hws [, has_data]
 
     return (list (highways = hws, dat_sc = dat_sc))
 }
