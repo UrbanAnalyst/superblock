@@ -97,7 +97,7 @@ parking_structure <- function (hws) {
             parking,
             function (p) {
                 p2 <- p [, 2, drop = FALSE]
-                index <- which (p2 > 0 && p2 %% l == 0)
+                index <- which (p2 [, 1] > 0 & p2 [, 1] %% l == 0)
                 index_ids <- match (rownames (p2) [index], hws$osm_id)
                 n <- floor (hw_lens [index_ids] / l)
                 cbind (n, rownames (p2) [index])
