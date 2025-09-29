@@ -28,7 +28,7 @@ parking_structure <- function (hws) {
     depths <- c (3, 4, 5) # (parallel, diagonal, perpendicular)
     angles <- c ("parallel", "diagonal", "perpenducular")
     # And equivalent lengths along the street
-    lengths <- c (5, 3, 3)
+    lengths <- c (5, 4, 3)
 
     parking <- sf::st_drop_geometry (hws [, grep ("parking", names (hws))])
     hws <- hws [, which (!grepl ("parking", names (hws)))]
