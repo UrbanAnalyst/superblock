@@ -105,7 +105,13 @@ reduce_osm_highways <- function (hws, hw_names) {
     )
     index <- which (hws$highway %in% c ("residential", "secondary", "tertiary"))
     hws_internal <- hws [index, ]
-    hws_internal [which (!hws_internal$name %in% hw_names), ]
+    hws <- hws_internal [which (!hws_internal$name %in% hw_names), ]
+
+    # Then reduce cols again to only those with data:
+    index <- vapply (names (hws), function (n) any (!is.na (hws [[n]])), logical (1L))
+    hws <- hws [, index]
+
+    return (hws)
 }
 
 extract_osm_buildings <- function (bbox, bounding_poly) {
