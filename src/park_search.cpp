@@ -215,3 +215,77 @@ Rcpp::DataFrame rcpp_park_search (const Rcpp::DataFrame graph,
 
     return res;
 }
+
+//' rcpp_park_fill
+//'
+//' @noRd
+// [[Rcpp::export]]
+Rcpp::DataFrame rcpp_park_fill (const Rcpp::DataFrame graph,
+        const Rcpp::List edge_map_in,
+        const Rcpp::List edge_map_rev_in,
+        const double prop_full,
+        const int ntrials)
+{
+
+    Rcpp::RNGScope scope;
+
+    parksearch::EdgeMapType edgeMap, edgeMapRev;
+    parksearch::makeEdgeMaps (edge_map_in, edge_map_rev_in, edgeMap, edgeMapRev);
+
+    std::vector <double> dist = graph ["d"];
+    std::vector <int> num_spaces = graph ["np"];
+    size_t nedges = static_cast <size_t> (graph.nrow ());
+
+    int ntotal = 0;
+    for (auto n: num_spaces) {
+        ntotal += n;
+    }
+    int n_full = floor (ntotal * prop_full);
+
+    double prop_i = prop_full;
+    const int outSize = ntotal - n_full;
+    Rcpp::NumericVector d (outSize, -1.0);
+    Rcpp::NumericVector p (outSize);
+
+    for (int i = n_full; i < ntotal; i++) {
+
+        double dsum = 0;
+        int count = 0L;
+
+        for (size_t n = 0; n < static_cast<size_t>(ntrials); n++) {
+
+            std::vector <double> p_empty = parksearch::fillParkingSpaces (num_spaces, prop_i);
+
+            std::vector <double> d_to_empty(nedges, 0.0);
+            parksearch::fill_d_to_empty(num_spaces, dist, d_to_empty, prop_i);
+
+            // oneParkSearch assumes start_edge is 1-based R index:
+            int start_edge = Rcpp::as<int>(Rcpp::runif(1, 0, nedges)) + 1L;
+
+            std::vector<double> res = parksearch::oneParkSearch (
+                edgeMap, edgeMapRev, dist, d_to_empty, p_empty, nedges,
+                static_cast<size_t>(start_edge)
+            );
+
+            if (res[2] > 0) {
+                dsum += res[2];
+                count++;
+            }
+        }
+
+        if (count > 0) {
+            d [i - n_full] = dsum / static_cast<double>(count);
+        }
+        p [i - n_full] = prop_i;
+
+        prop_i = static_cast<double>(i) / static_cast<double>(ntotal);
+    }
+
+    Rcpp::DataFrame res = Rcpp::DataFrame::create (
+        Rcpp::Named ("p") = p,
+        Rcpp::Named ("d") = d,
+        Rcpp::_["stringsAsFactors"] = false
+    );
+
+    return res;
+}
