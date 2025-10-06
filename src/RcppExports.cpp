@@ -27,7 +27,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // rcpp_park_fill
-Rcpp::DataFrame rcpp_park_fill(const Rcpp::DataFrame graph, const Rcpp::List edge_map_in, const Rcpp::List edge_map_rev_in, const double prop_full, const int ntrials);
+Rcpp::NumericVector rcpp_park_fill(const Rcpp::DataFrame graph, const Rcpp::List edge_map_in, const Rcpp::List edge_map_rev_in, const double prop_full, const int ntrials);
 RcppExport SEXP _superblock_rcpp_park_fill(SEXP graphSEXP, SEXP edge_map_inSEXP, SEXP edge_map_rev_inSEXP, SEXP prop_fullSEXP, SEXP ntrialsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
