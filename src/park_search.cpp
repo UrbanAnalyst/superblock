@@ -26,7 +26,7 @@ void parksearch::makeEdgeMaps (
     }
 }
 
-std::vector <size_t> parksearch::randomOrder (int ntotal, size_t n) {
+std::vector <size_t> parksearch::randomOrder (const int ntotal, const size_t n) {
 
     std::vector <double> xrand = Rcpp::as<std::vector<double>> (Rcpp::runif (ntotal));
 
@@ -40,7 +40,9 @@ std::vector <size_t> parksearch::randomOrder (int ntotal, size_t n) {
     return res;
 }
 
-std::vector <double> parksearch::fillParkingSpaces (std::vector <int> num_spaces, double prop_full) {
+std::vector <double> parksearch::fillParkingSpaces (
+    const std::vector <int> &num_spaces,
+    const double prop_full) {
 
     const size_t n = num_spaces.size();
     std::vector <double> p_empty (n, 0.0);
@@ -81,9 +83,9 @@ std::vector <double> parksearch::fillParkingSpaces (std::vector <int> num_spaces
 std::vector<double> parksearch::oneParkSearch (
     const parksearch::EdgeMapType &edgeMap,
     const parksearch::EdgeMapType &edgeMapRev,
-    std::vector <double> &dist,
-    std::vector <double> &d_to_empty,
-    std::vector <double> &p_empty,
+    const std::vector <double> &dist,
+    const std::vector <double> &d_to_empty,
+    const std::vector <double> &p_empty,
     const size_t nedges,
     const size_t start_edge
 ) {
@@ -212,4 +214,70 @@ Rcpp::DataFrame rcpp_park_search (const Rcpp::DataFrame graph,
     );
 
     return res;
+}
+
+//' rcpp_park_fill
+//'
+//' @noRd
+// [[Rcpp::export]]
+Rcpp::NumericVector rcpp_park_fill (const Rcpp::DataFrame graph,
+        const Rcpp::List edge_map_in,
+        const Rcpp::List edge_map_rev_in,
+        const double prop_full,
+        const int ntrials)
+{
+
+    Rcpp::RNGScope scope;
+
+    parksearch::EdgeMapType edgeMap, edgeMapRev;
+    parksearch::makeEdgeMaps (edge_map_in, edge_map_rev_in, edgeMap, edgeMapRev);
+
+    std::vector <double> dist = graph ["d"];
+    std::vector <int> num_spaces = graph ["np"];
+    size_t nedges = static_cast <size_t> (graph.nrow ());
+
+    int ntotal = 0;
+    for (auto n: num_spaces) {
+        ntotal += n;
+    }
+    int n_full = floor (ntotal * prop_full);
+
+    Rcpp::NumericVector d (ntrials, 0.0);
+
+    for (size_t n = 0; n < static_cast<size_t>(ntrials); n++) {
+
+        double prop_i = prop_full;
+
+        // Incrementally fill spaces and add all distances:
+        for (int i = n_full; i < ntotal; i++) {
+
+            std::vector <double> p_empty = parksearch::fillParkingSpaces (num_spaces, prop_i);
+
+            std::vector <double> d_to_empty(nedges, 0.0);
+            parksearch::fill_d_to_empty(num_spaces, dist, d_to_empty, prop_i);
+
+            // oneParkSearch assumes start_edge is 1-based R index:
+            int start_edge = Rcpp::as<int>(Rcpp::runif(1, 0, nedges)) + 1L;
+            bool found = false;
+            int nattempts = 0;
+            std::vector<double> res;
+            while (!found && nattempts < 100) {
+                res = parksearch::oneParkSearch (
+                    edgeMap, edgeMapRev, dist, d_to_empty, p_empty, nedges,
+                    static_cast<size_t>(start_edge)
+                );
+                found = res[2] > 0;
+                nattempts++;
+            }
+
+            if (res[2] > 0) {
+                d[n] += res[2];
+            }
+
+            prop_i = static_cast<double>(i) / static_cast<double>(ntotal);
+        }
+
+    }
+
+    return d;
 }
