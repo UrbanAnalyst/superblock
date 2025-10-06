@@ -26,7 +26,7 @@ void parksearch::makeEdgeMaps (
     }
 }
 
-std::vector <size_t> parksearch::randomOrder (int ntotal, size_t n) {
+std::vector <size_t> parksearch::randomOrder (const int ntotal, const size_t n) {
 
     std::vector <double> xrand = Rcpp::as<std::vector<double>> (Rcpp::runif (ntotal));
 
@@ -40,7 +40,9 @@ std::vector <size_t> parksearch::randomOrder (int ntotal, size_t n) {
     return res;
 }
 
-std::vector <double> parksearch::fillParkingSpaces (std::vector <int> num_spaces, double prop_full) {
+std::vector <double> parksearch::fillParkingSpaces (
+    const std::vector <int> num_spaces,
+    const double prop_full) {
 
     const size_t n = num_spaces.size();
     std::vector <double> p_empty (n, 0.0);
@@ -81,9 +83,9 @@ std::vector <double> parksearch::fillParkingSpaces (std::vector <int> num_spaces
 std::vector<double> parksearch::oneParkSearch (
     const parksearch::EdgeMapType &edgeMap,
     const parksearch::EdgeMapType &edgeMapRev,
-    std::vector <double> &dist,
-    std::vector <double> &d_to_empty,
-    std::vector <double> &p_empty,
+    const std::vector <double> &dist,
+    const std::vector <double> &d_to_empty,
+    const std::vector <double> &p_empty,
     const size_t nedges,
     const size_t start_edge
 ) {
