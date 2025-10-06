@@ -41,7 +41,7 @@ std::vector <size_t> parksearch::randomOrder (const int ntotal, const size_t n) 
 }
 
 std::vector <double> parksearch::fillParkingSpaces (
-    const std::vector <int> num_spaces,
+    const std::vector <int> &num_spaces,
     const double prop_full) {
 
     const size_t n = num_spaces.size();

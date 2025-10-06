@@ -27,7 +27,7 @@ void makeEdgeMaps (
 std::vector <size_t> randomOrder (const int ntotal, const size_t n);
 
 std::vector <double> fillParkingSpaces (
-    const std::vector <int> num_spaces,
+    const std::vector <int> &num_spaces,
     const double prop_full);
 
 void fill_d_to_empty (
