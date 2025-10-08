@@ -7,21 +7,25 @@ coverage](https://codecov.io/gh/UrbanAnalyst/superblock/graph/badge.svg)](https:
 # superblock
 
 An R package to analyse potential
-[superblocks](https://doi.org/10.1016%2Fj.cities.2024.105609).
+[superblocks](https://doi.org/10.1016%2Fj.cities.2024.105609). The
+following example demonstrates the main functionality.
 
 ## Example
 
 An example of the “Hansaviertel” of [Münster,
-Germany](https://www.openstreetmap.org/#map=17/51.955569/7.639795).
-First load the library and extract the necessary data from Open Street
-Map (OSM):
+Germany](https://www.openstreetmap.org/#map=17/51.955569/7.639795). Note
+that this entire document is dynamically-generated from the four lines
+of code shown immediately below. All numerical values described in the
+text are then taken from the actual data as downloaded from Open Street
+Map (OSM) at the time the document was generated.
+
+The first steps are to load the library and extract the necessary data:
 
 ``` r
 library (superblock)
 bbox <- c (7.63099, 51.95048, 7.66402, 51.96142)
 hw_names <- c ("Bremer Straße", "Bremer Platz", "Wolbecker Straße", "Hansaring")
-outer <- c (T, F, T, T)
-osmdat <- sb_osmdata_extract (bbox, hw_names, outer = outer)
+osmdat <- sb_osmdata_extract (bbox, hw_names)
 ```
 
 The `sb_summary()` function then summarises change in publicly
@@ -34,10 +38,10 @@ sb_summary (osmdat)
 #> • Proportion open space: 7.36%
 #> • Proportion roads: 15.7%, of which:
 #>   • 32.5% is for car roads
-#>   • 39.9% is for parked cars, and
-#>   • 27.6% remains for everybody else.
+#>   • 39.7% is for parked cars, and
+#>   • 27.7% remains for everybody else.
 #> • There are street parking spaces for 8.6% of all residents.
-#> • So 8.6% of residents occupy 39.9% of all space
+#> • So 8.6% of residents occupy 39.7% of all space
 #> 
 #> • Total proportion of public space: 11.7
 #> • Total proportion of public space as superblock: 23.1
@@ -48,18 +52,29 @@ sb_summary (osmdat)
 
 ### Analysis of parking times
 
-There is also a function to estimate how long it takes to find car park
-as a function of the proportion of available car parking spaces. The
-results are compared to equivalent times to drive to the nearest large
-parking facility (“garage” in the graph below), to park a car, and then
-walk back to the place of residence.
+There are two additional functions to estimate how long people spend
+driving around searching for car parking spaces, and how far they
+actually drive.
+
+#### Individual times search for parking spaces
+
+The first function estimates the time taken on average for each resident
+of the superblock to find a car parking space, as a function of the
+proportion of available car parking spaces. Results are based on
+simulations using actual data for the specified superblock to estimate
+how long it takes on average to fill all of the remaining parking
+spaces.
+
+The results are compared to equivalent times to drive to the nearest
+large parking facility (“garage” in the graph below), to park a car, and
+then walk back to the place of residence.
+
+<img src="man/figures/README-parking-times-1.png" width="672" />
 
 ``` r
 times <- sb_parking_times (osmdat)
 plot (times)
 ```
-
-<img src="man/figures/README-parking-times-1.png" width="672" />
 
 The results shows how long it takes to find a parking space for an
 average attempt (“park(50%)”), for one out of every four attempts
@@ -72,3 +87,39 @@ would take on average for all residents of the area to drive directly to
 a nearby large parking facility (“garage”), park, and walk back. Beyond
 around 95% occupancy, it is always quicker to park in a garage and walk
 back.
+
+#### Total distances driven while searching for parking spaces
+
+The average times to find parking spaces shown above are only high in
+extreme cases (the 90% line), and when almost all parks are full.
+Nevertheless, most parking spaces are indeed completely full most nights
+of the week, suggesting the some people must experience these extremes
+most days. An additional function estimates the total distances driven
+by everybody while filling all parking spaces.
+
+``` r
+d <- sb_parking_km_per_empty (osmdat)
+plot (d$prop_full, d$d, type = "l", col = "red", lwd = 2,
+    xlab = "Initial proportion filled",
+    ylab = "Distance per empty car park until completely filled (in km)")
+```
+
+<img src="man/figures/README-parking-per-km-1.png" width="672" />
+
+Because filling the final few spaces takes so long, and people have to
+drive so far to fill them, the overall distance driven to fill all
+spaces is actually quite long. The block has around 620 parking spaces
+in total, so with an initial proportion filled of 70%, people have to
+drive a total of around 1km times 0.3 × 620 = 186km. While this may seem
+extreme, consider that most of this distance is covered by the last few
+people driving to find parking spaces, who are forced to drive several
+kilometres. The longest street within the block is 1.3km, while one of
+the surrounding streets is 3.0km. Ten people driving along both of those
+streets will cover 43km, which is 23% of the total distance of 186 km
+covered by that same number of drivers.
+
+Or in terms of time, if the average driving speed while searching for a
+parking space is 20km/hr, then those 186 people each take an average of
+1/20th of an hour, or only 3 minutes, to find a park, yet aggregated
+over all free parking spaces, that amounts to a total of 9.3 hours for
+everybody to fill all remaining car parks.
