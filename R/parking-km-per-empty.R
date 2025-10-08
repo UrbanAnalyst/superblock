@@ -1,8 +1,17 @@
 #' Total kilometres driven to fill all parking spaces
 #'
 #' @inheritParams sb_parking_times
+#' @return A `data.frame` of three columns:
+#' \enumerate{
+#' \item `prop_full` The initial proportion of filled parking spaces.
+#' \item `d` The resultant average distance per km to fill all remaining spaces
+#' starting at the value specifified by `prop_full`.
+#' \item `d_to_parking` Equilvalent average distances to drive directly to
+#' nearest large parking facilitity, instead of circling around searching for
+#' spaces within the specified superblock itself.
+#' }
 #'
-#' @noRd
+#' @export
 sb_parking_km_per_empty <- function (osmdat,
                                      prop_min = 0.7,
                                      n_props = 10,
