@@ -5,6 +5,8 @@
 #' @param add_parking_osm_ids Optional list of 'OSM' id values for any ways
 #' which have no parking specified in OpenStreetMap, which are then assigned
 #' average values from all other ways which do have parking specified.
+#' @return (Invisibly) A named list of the areas devoted to the aspects
+#' presented in the summary (all in Hectares).
 #' @export
 sb_summary <- function (osmdat, hw_polygons = NULL, add_parking_osm_ids = NULL) {
 
@@ -54,4 +56,13 @@ sb_summary <- function (osmdat, hw_polygons = NULL, add_parking_osm_ids = NULL) 
     cli::cli_li ("Total proportion of public space as superblock: {a_public_prop_adj}")
     cli::cli_li ("Increase in public space as superblock: {public_incr}%")
     cli::cli_end (ul1)
+
+    invisible (list (
+        area_total = a_tot,
+        area_building = a_bldg,
+        area_open = a_open,
+        area_hw = a_hw,
+        area_road = a_road,
+        area_parking = a_parking
+    ))
 }

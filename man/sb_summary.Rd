@@ -15,6 +15,10 @@ sb_summary(osmdat, hw_polygons = NULL, add_parking_osm_ids = NULL)
 which have no parking specified in OpenStreetMap, which are then assigned
 average values from all other ways which do have parking specified.}
 }
+\value{
+(Invisibly) A named list of the areas devoted to the aspects
+presented in the summary (all in Hectares).
+}
 \description{
 Print screen summary of effect of superblock on public space.
 }
