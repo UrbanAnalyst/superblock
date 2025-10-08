@@ -27,8 +27,8 @@ test_that ("parking times", {
     expect_s3_class (times, "data.frame")
     expect_s3_class (times, "sb_parking")
     nms <- c (
-        "prop", "d0_mn", "d0_50", "d0_75", "d0_90", "dwalk_mn", "dwalk_50",
-        "dwalk_75", "dwalk_90", "time_to_parking", "time_from_parking"
+        "prop", "d0_mn", "d0_50", "d0_80", "d0_90", "dwalk_mn", "dwalk_50",
+        "dwalk_80", "dwalk_90", "time_to_parking", "time_from_parking"
     )
     expect_named (times, nms)
     for (n in nms) {
