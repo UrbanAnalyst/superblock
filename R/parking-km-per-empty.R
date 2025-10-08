@@ -32,10 +32,15 @@ sb_parking_km_per_empty <- function (osmdat,
         )
     })
 
+    # The value of 'n' passed here doesn't matter at all
+    d_to_parking <- km_per_empty_to_parking (osmdat)
+
+    # Convert all distances to km:
     data.frame (
         prop_full = prop_full,
-        y = unlist (res),
-        n_unfilled = as.character (n_unfilled)
+        d = unlist (res) / 1000,
+        n_unfilled = as.character (n_unfilled),
+        d_to_parking = mean (d_to_parking, na.rm = TRUE) / 1000
     )
 }
 
@@ -62,13 +67,13 @@ simulate_km_per_empty <- function (net,
     )
     total_parking_spaces <- sum (net$np)
     n_empty <- ceiling (total_parking_spaces * (1 - prop_full)) - n_unfilled
-    mean (x) / (1000 * n_empty)
+    mean (x) / n_empty
 }
 
 #' Equilvalent km per empty car park for travelling to nearest parking
 #' facilities.
 #' @noRd
-km_per_empty_to_parking <- function (osmdat) {
+km_per_empty_to_parking_internal <- function (osmdat) {
 
     b <- buildings_to_highways (osmdat)
     net <- dodgr::weight_streetnet (
@@ -127,3 +132,5 @@ km_per_empty_to_parking <- function (osmdat) {
 
     return (dvec)
 }
+
+km_per_empty_to_parking <- memoise::memoise (km_per_empty_to_parking_internal)
