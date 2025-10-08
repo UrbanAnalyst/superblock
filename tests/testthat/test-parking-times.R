@@ -47,4 +47,24 @@ test_that ("parking times", {
     ld <- ggplot2::layer_data (pl)
     group_lens <- table (ld$group)
     expect_true (all (group_lens == length (prop)))
+
+    n_props <- 3L
+    dat <- withr::with_envvar (
+        list ("SUPERBLOCK_TESTS" = "true"),
+        sb_parking_km_per_empty (
+            osmdat,
+            n_props = n_props,
+            ntrials = 2
+        )
+    )
+    expect_s3_class (dat, "data.frame")
+    expect_equal (nrow (dat), n_props)
+    expect_named (dat, c ("prop_full", "d", "d_to_parking"))
+    expect_type (dat$prop_full, "double")
+    expect_type (dat$d, "double")
+    expect_type (dat$d_to_parking, "double")
+    expect_true (all (diff (dat$prop_full) > 0))
+    # distances should generally increase with 'prop_full':
+    expect_true (mean (diff (dat$d)) > 0)
+    expect_length (unique (dat$d_to_parking), 1L) # all identical
 })
