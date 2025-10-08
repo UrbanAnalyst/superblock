@@ -85,6 +85,7 @@ d <- sb_parking_km_per_empty (osmdat)
 net <- superblock:::parking_as_dodgr_net (osmdat)
 nspaces <- sum (net$np)
 nspaces_filled <- round (0.3 * nspaces)
+d_to_parking_fmt <- sprintf ("%.1f", d$d_to_parking [1])
 d_tot_to_parking <- round (d$d_to_parking [1] * 0.3 * nspaces)
 parking_efficiency <- round (100 * (1 - d_tot_to_parking / nspaces_filled))
 
@@ -126,7 +127,7 @@ Hansaviertel amounts to the `r park_res_prop`% of residents who are able to
 park driving a total distance of around `r nspaces_filled` km every evening to
 fill these spaces. Were they to park in the nearby parking facilities, this
 total distance would reduce to only `r d_tot_to_parking` km. **By this measure,
-use of nearby public parking facilities is `r parking_efficiency`% more
+use of nearby public parking facilities would be `r parking_efficiency`% more
 efficient than this `r prop_parking`% of available street space being otherwise
 used by only `r park_res_prop`% of all residents. Using nearby public parking
 facilities would also increase space available for general public usage within
@@ -190,8 +191,11 @@ The average times to find parking spaces shown above are only high in extreme
 cases (the 90% line), and when almost all parks are full. Nevertheless, most
 parking spaces are indeed completely full most nights of the week, suggesting
 the some people must experience these extremes most days. An additional
-function estimates the total distances driven by everybody while filling all
-parking spaces.
+function generates a more useful "overview" statistic
+by estimating the total distances driven by everybody while filling all parking
+spaces, assuming that 70% of parking spaces are initially full. This is
+equivalent to assuming that 30% of residents use their cars on a daily basis,
+with results for other initial proportions readily seen from the graph below.
 
 ```{r parking-per-km-plot-fakey, eval = FALSE}
 d <- sb_parking_km_per_empty (osmdat)
@@ -210,20 +214,27 @@ plot (d$prop_full, d$d,
 )
 ```
 
-Because filling the final few spaces takes so long, and people have to drive so
-far to fill them, the overall distance driven to fill all spaces is actually
-quite long. The block has around `r nspaces` parking spaces in total, so with
-an initial proportion filled of 70%, people have to drive a total of around 1km
-times 0.3 &times; `r nspaces` = `r nspaces_filled`km. While this may seem
-extreme, consider that most of this distance is covered by the last few people
-driving to find parking spaces, who are forced to drive several kilometres.
-The longest street within the block is `r max_len_within`km, while one of the
-surrounding streets is `r max_len`km. Ten people driving along both of those
-streets will cover `r ten_drivers`km, which is
-`r round(100*ten_drivers/nspaces_filled)`% of the total distance of
+Because filling the final few spaces takes so long, as shown in the first graph
+above, and people have to drive so far to fill them, the overall distance
+driven to fill all spaces is actually quite long. The block has around
+`r nspaces` parking spaces in total, so with an initial proportion filled of
+70%, people have to drive a total of around 1km times 0.3 &times; `r nspaces` =
+`r nspaces_filled`km. While this may seem extreme, consider that most of this
+distance is covered by the last few people driving to find parking spaces, who
+are forced to drive several kilometres. The longest street within the block is
+`r max_len_within`km, while one of the surrounding streets is `r max_len`km.
+Ten people driving along both of those streets will cover `r ten_drivers`km,
+which is `r round(100*ten_drivers/nspaces_filled)`% of the total distance of
 `r nspaces_filled` km covered by that same number of drivers.
 
-Or in terms of time, if the average driving speed while searching for a
+The average distance needed to be driven to the public parking facility nearest
+to every building in Hansaviertel is only `r d_to_parking_fmt`km, so the
+`r nspaces_filled` people searching for parking spaces would have to drive only
+`r round(d$d_to_parking[1] * nspaces_filled)`km in total. Thus, as summarised
+at the outset, the use of nearby parking facilities would be
+`r parking_efficiency`% more efficient than parking within Hansaviertel itself.
+
+In terms of time, if the average driving speed while searching for a
 parking space is 20km/hr, then those 186 people each take an average of
 1/20th of an hour, or only 3 minutes, to find a park, yet aggregated
 over all free parking spaces, that amounts to a total of

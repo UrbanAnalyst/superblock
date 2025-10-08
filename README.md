@@ -54,7 +54,7 @@ Hansaviertel amounts to the 8.6% of residents who are able to park
 driving a total distance of around 186 km every evening to fill these
 spaces. Were they to park in the nearby parking facilities, this total
 distance would reduce to only 49 km. **By this measure, use of nearby
-public parking facilities is 74% more efficient than this 39.7% of
+public parking facilities would be 74% more efficient than this 39.7% of
 available street space being otherwise used by only 8.6% of all
 residents. Using nearby public parking facilities would also increase
 space available for general public usage within Hansaviertel by 97%.**
@@ -129,8 +129,12 @@ The average times to find parking spaces shown above are only high in
 extreme cases (the 90% line), and when almost all parks are full.
 Nevertheless, most parking spaces are indeed completely full most nights
 of the week, suggesting the some people must experience these extremes
-most days. An additional function estimates the total distances driven
-by everybody while filling all parking spaces.
+most days. An additional function generates a more useful “overview”
+statistic by estimating the total distances driven by everybody while
+filling all parking spaces, assuming that 70% of parking spaces are
+initially full. This is equivalent to assuming that 30% of residents use
+their cars on a daily basis, with results for other initial proportions
+readily seen from the graph below.
 
 ``` r
 d <- sb_parking_km_per_empty (osmdat)
@@ -143,19 +147,27 @@ plot (d$prop_full, d$d,
 
 <img src="man/figures/README-parking-per-km-plot-1.png" width="672" />
 
-Because filling the final few spaces takes so long, and people have to
-drive so far to fill them, the overall distance driven to fill all
-spaces is actually quite long. The block has around 620 parking spaces
-in total, so with an initial proportion filled of 70%, people have to
-drive a total of around 1km times 0.3 × 620 = 186km. While this may seem
-extreme, consider that most of this distance is covered by the last few
-people driving to find parking spaces, who are forced to drive several
-kilometres. The longest street within the block is 1.3km, while one of
-the surrounding streets is 3.0km. Ten people driving along both of those
-streets will cover 43km, which is 23% of the total distance of 186 km
-covered by that same number of drivers.
+Because filling the final few spaces takes so long, as shown in the
+first graph above, and people have to drive so far to fill them, the
+overall distance driven to fill all spaces is actually quite long. The
+block has around 620 parking spaces in total, so with an initial
+proportion filled of 70%, people have to drive a total of around 1km
+times 0.3 × 620 = 186km. While this may seem extreme, consider that most
+of this distance is covered by the last few people driving to find
+parking spaces, who are forced to drive several kilometres. The longest
+street within the block is 1.3km, while one of the surrounding streets
+is 3.0km. Ten people driving along both of those streets will cover
+43km, which is 23% of the total distance of 186 km covered by that same
+number of drivers.
 
-Or in terms of time, if the average driving speed while searching for a
+The average distance needed to be driven to the public parking facility
+nearest to every building in Hansaviertel is only 0.3km, so the 186
+people searching for parking spaces would have to drive only
+49km in total. Thus, as summarised at the outset, the use of
+nearby parking facilities would be 74% more efficient than parking
+within Hansaviertel itself.
+
+In terms of time, if the average driving speed while searching for a
 parking space is 20km/hr, then those 186 people each take an average of
 1/20th of an hour, or only 3 minutes, to find a park, yet aggregated
 over all free parking spaces, that amounts to a total of 9.3 hours for
