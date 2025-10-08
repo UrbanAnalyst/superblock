@@ -45,7 +45,7 @@ parking_times_raw_data <- function (osmdat, n_props = 10L, prop_min = 0.7, ntria
         net$np <- seq_len (nrow (net))
     }
     index <- which (!is.na (net$name) & !net$name %in% osmdat$hw_names & net$np > 0)
-    quantiles <- c (0.5, 0.75, 0.9)
+    quantiles <- c (0.5, 0.8, 0.9)
     nq <- length (quantiles)
     res <- pbapply::pblapply (prop, function (p) {
         res_p <- t (vapply (
