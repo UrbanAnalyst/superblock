@@ -241,8 +241,9 @@ Rcpp::NumericVector rcpp_park_fill (const Rcpp::DataFrame graph,
     for (auto n: num_spaces) {
         ntotal += n;
     }
-    ntotal -= n_unfilled;
     int n_full = floor (ntotal * prop_full);
+    // Then reduce total number to be filled by 'n_unfilled':
+    ntotal -= n_unfilled;
 
     Rcpp::NumericVector d (ntrials, 0.0);
 
