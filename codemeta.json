@@ -7,7 +7,7 @@
   "codeRepository": "https://github.com/UrbanAnalyst/superblock-ms",
   "issueTracker": "https://github.com/UrbanAnalyst/superblock-ms/issues",
   "license": "https://spdx.org/licenses/GPL-3.0",
-  "version": "0.1.0.136",
+  "version": "0.1.1",
   "programmingLanguage": {
     "@type": "ComputerLanguage",
     "name": "R",
@@ -257,11 +257,8 @@
       },
       "sameAs": "https://CRAN.R-project.org/package=units"
     },
-    "SystemRequirements": {}
+    "SystemRequirements": null
   },
-  "fileSize": "4436.035KB",
-  "contIntegration": [
-    "https://github.com/UrbanAnalyst/superblock/actions/workflows/R-CMD-check.yaml",
-    "https://app.codecov.io/gh/UrbanAnalyst/superblock"
-  ]
+  "fileSize": "4865.173KB",
+  "contIntegration": ["https://github.com/UrbanAnalyst/superblock/actions/workflows/R-CMD-check.yaml", "https://app.codecov.io/gh/UrbanAnalyst/superblock"]
 }
