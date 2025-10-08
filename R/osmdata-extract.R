@@ -98,6 +98,8 @@ extract_osm_highways <- function (bbox, bounding_poly) {
 #' @noRd
 reduce_osm_highways <- function (hws, hw_names) {
 
+    requireNamespace ("sf", quietly = TRUE) # For the sub-setting below:
+
     hws_internal <- hws [which (!hws$name %in% hw_names), ]
     index <- which (
         hws$highway %in% c ("residential", "secondary", "service", "tertiary") &
