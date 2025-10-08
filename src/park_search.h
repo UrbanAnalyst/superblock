@@ -59,5 +59,4 @@ Rcpp::NumericVector rcpp_park_fill (const Rcpp::DataFrame graph,
         const Rcpp::List edge_map_in,
         const Rcpp::List edge_map_rev_in,
         const double prop_full,
-        const int ntrials,
-        const int n_unfilled = 0);
+        const int ntrials);

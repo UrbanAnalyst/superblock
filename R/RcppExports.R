@@ -11,6 +11,6 @@ rcpp_park_search <- function (graph, edge_map_in, edge_map_rev_in, prop_full, st
 #' rcpp_park_fill
 #'
 #' @noRd
-rcpp_park_fill <- function (graph, edge_map_in, edge_map_rev_in, prop_full, ntrials, n_unfilled) {
-    .Call (`_superblock_rcpp_park_fill`, graph, edge_map_in, edge_map_rev_in, prop_full, ntrials, n_unfilled)
+rcpp_park_fill <- function (graph, edge_map_in, edge_map_rev_in, prop_full, ntrials) {
+    .Call (`_superblock_rcpp_park_fill`, graph, edge_map_in, edge_map_rev_in, prop_full, ntrials)
 }
