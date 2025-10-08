@@ -50,7 +50,16 @@ parking_times_raw_data <- function (osmdat, n_props = 10L, prop_min = 0.7, ntria
     res <- pbapply::pblapply (prop, function (p) {
         res_p <- t (vapply (
             index, function (i) {
-                parking_time_simulate (net, net_walk, emap, emap_rev, prop_full = p, start_edge = i, ntrials = ntrials)
+                parking_time_simulate (
+                    net,
+                    net_walk,
+                    emap,
+                    emap_rev,
+                    prop_full = p,
+                    start_edge = i,
+                    ntrials = ntrials,
+                    quantiles = quantiles
+                )
             }, numeric (2 * nq + 2)
         ))
         # 2 cols for (out with car, back by foot) times

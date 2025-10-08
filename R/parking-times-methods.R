@@ -6,15 +6,18 @@ plot.sb_parking <- function (x, ...) {
 
     requireNamespace ("ggplot2", quietly = TRUE)
 
+    dcols <- grep ("^d0\\_[0-9]+", names (x), value = TRUE)
+    quantiles <- gsub ("^d0\\_", "", dcols)
+    times <- lapply (quantiles, function (q) {
+        x [[paste0 ("d0_", q)]] + x [[paste0 ("dwalk_", q)]]
+    })
+    time_parking <- x$time_to_parking + x$time_from_parking
+    time_names <- paste0 ("park", quantiles)
+
     dat <- data.frame (
         prop = rep (x$prop, times = 4L),
-        time = c (
-            x$d0_50 + x$dwalk_50,
-            x$d0_75 + x$dwalk_75,
-            x$d0_90 + x$dwalk_90,
-            x$time_to_parking + x$time_from_parking
-        ),
-        what = rep (c ("park50", "park75", "park90", "garage"), each = nrow (x))
+        time = c (do.call (c, times), time_parking),
+        what = rep (c (time_names, "garage"), each = nrow (x))
     )
 
     index <- grep ("park", dat$what)
