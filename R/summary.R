@@ -63,6 +63,7 @@ sb_summary <- function (osmdat, hw_polygons = NULL, add_parking_osm_ids = NULL) 
         area_open = a_open,
         area_hw = a_hw,
         area_road = a_road,
-        area_parking = a_parking
+        area_parking = a_parking,
+        car_parks_per_res = car_parks_per_res
     ))
 }
