@@ -75,6 +75,9 @@ simulate_km_per_empty <- function (net,
 #' @noRd
 km_per_empty_to_parking_internal <- function (osmdat) {
 
+    # Suppress no visible binding notes:
+    name <- NULL
+
     b <- buildings_to_highways (osmdat)
     net <- dodgr::weight_streetnet (
         osmdat$dat_sc,

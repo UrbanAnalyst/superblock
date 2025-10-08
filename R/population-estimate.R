@@ -56,7 +56,8 @@ exclude_ground_floor <- c ("civic", "office", "retail", "supermarket")
 
 filter_residential_buildings <- function (b) {
 
-    `addr:street` <- `addr:housenumber` <- NULL
+    # Suppress no visible binding notes:
+    building <- `addr:street` <- `addr:housenumber` <- NULL
 
     exclude <- c ("carport", "garage", "garages", "school", "shed", "yes")
     b <- dplyr::filter (b, !building %in% exclude) |>
