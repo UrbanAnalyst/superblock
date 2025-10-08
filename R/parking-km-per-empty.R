@@ -18,7 +18,9 @@ sb_parking_km_per_empty <- function (osmdat,
     emap <- make_edge_to_edge_map (net)
     emap_rev <- make_edge_to_edge_map (net, rev = TRUE)
 
-    prop_full <- seq (prop_min, 1, length.out = n_props + 1)
+    ntotal <- sum (net$np)
+    prop_max <- (ntotal - n_unfilled) / ntotal
+    prop_full <- seq (prop_min, prop_max, length.out = n_props + 1)
     prop_full <- prop_full [-length (prop_full)]
 
     res <- pbapply::pblapply (prop_full, function (p) {
@@ -59,14 +61,19 @@ simulate_km_per_empty <- function (net,
                                    ntrials,
                                    n_unfilled = 0) {
 
+    total_parking_spaces <- sum (net$np)
+    n_empty <- ceiling (total_parking_spaces * (1 - prop_full)) - n_unfilled
+    if (n_empty <= 0) {
+        return (-1)
+    }
+
     x <- rcpp_park_fill (
         net, emap, emap_rev,
         prop_full = prop_full,
         ntrials = ntrials,
         n_unfilled = n_unfilled
     )
-    total_parking_spaces <- sum (net$np)
-    n_empty <- ceiling (total_parking_spaces * (1 - prop_full)) - n_unfilled
+
     mean (x) / n_empty
 }
 
