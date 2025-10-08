@@ -224,7 +224,8 @@ Rcpp::NumericVector rcpp_park_fill (const Rcpp::DataFrame graph,
         const Rcpp::List edge_map_in,
         const Rcpp::List edge_map_rev_in,
         const double prop_full,
-        const int ntrials)
+        const int ntrials,
+        const int n_unfilled)
 {
 
     Rcpp::RNGScope scope;
@@ -240,6 +241,7 @@ Rcpp::NumericVector rcpp_park_fill (const Rcpp::DataFrame graph,
     for (auto n: num_spaces) {
         ntotal += n;
     }
+    ntotal -= n_unfilled;
     int n_full = floor (ntotal * prop_full);
 
     Rcpp::NumericVector d (ntrials, 0.0);

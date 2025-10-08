@@ -27,8 +27,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // rcpp_park_fill
-Rcpp::NumericVector rcpp_park_fill(const Rcpp::DataFrame graph, const Rcpp::List edge_map_in, const Rcpp::List edge_map_rev_in, const double prop_full, const int ntrials);
-RcppExport SEXP _superblock_rcpp_park_fill(SEXP graphSEXP, SEXP edge_map_inSEXP, SEXP edge_map_rev_inSEXP, SEXP prop_fullSEXP, SEXP ntrialsSEXP) {
+Rcpp::NumericVector rcpp_park_fill(const Rcpp::DataFrame graph, const Rcpp::List edge_map_in, const Rcpp::List edge_map_rev_in, const double prop_full, const int ntrials, const int n_unfilled);
+RcppExport SEXP _superblock_rcpp_park_fill(SEXP graphSEXP, SEXP edge_map_inSEXP, SEXP edge_map_rev_inSEXP, SEXP prop_fullSEXP, SEXP ntrialsSEXP, SEXP n_unfilledSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -37,14 +37,15 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const Rcpp::List >::type edge_map_rev_in(edge_map_rev_inSEXP);
     Rcpp::traits::input_parameter< const double >::type prop_full(prop_fullSEXP);
     Rcpp::traits::input_parameter< const int >::type ntrials(ntrialsSEXP);
-    rcpp_result_gen = Rcpp::wrap(rcpp_park_fill(graph, edge_map_in, edge_map_rev_in, prop_full, ntrials));
+    Rcpp::traits::input_parameter< const int >::type n_unfilled(n_unfilledSEXP);
+    rcpp_result_gen = Rcpp::wrap(rcpp_park_fill(graph, edge_map_in, edge_map_rev_in, prop_full, ntrials, n_unfilled));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
     {"_superblock_rcpp_park_search", (DL_FUNC) &_superblock_rcpp_park_search, 6},
-    {"_superblock_rcpp_park_fill", (DL_FUNC) &_superblock_rcpp_park_fill, 5},
+    {"_superblock_rcpp_park_fill", (DL_FUNC) &_superblock_rcpp_park_fill, 6},
     {NULL, NULL, 0}
 };
 
