@@ -10,8 +10,6 @@ An R package to analyse potential
 [superblocks](https://doi.org/10.1016%2Fj.cities.2024.105609). The
 following example demonstrates the main functionality.
 
-With new text.
-
 ## Example
 
 An example of the “Hansaviertel” of [Münster,
